@@ -1,5 +1,7 @@
 # Build Instructions
 
+## Sourced from: https://polymc.org/wiki/development/build-instructions/
+
 ## Contents
 
 - [Getting the source](#getting-the-source)
