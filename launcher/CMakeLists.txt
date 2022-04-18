@@ -144,6 +144,8 @@ set(LAUNCH_SOURCES
     launch/steps/TextPrint.h
     launch/steps/Update.cpp
     launch/steps/Update.h
+    launch/steps/QuitAfterGameStop.cpp
+    launch/steps/QuitAfterGameStop.h
     launch/LaunchStep.cpp
     launch/LaunchStep.h
     launch/LaunchTask.cpp
@@ -173,13 +175,6 @@ add_unit_test(DownloadTask
     LIBS Launcher_logic
     DATA updater/testdata
     )
-
-# Rarely used notifications
-set(NOTIFICATIONS_SOURCES
-    # Notifications - short warning messages
-    notifications/NotificationChecker.h
-    notifications/NotificationChecker.cpp
-)
 
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES
@@ -353,28 +348,30 @@ set(MINECRAFT_SOURCES
 
     mojang/PackageManifest.h
     mojang/PackageManifest.cpp
-    )
+    minecraft/Agent.h)
 
 add_unit_test(GradleSpecifier
     SOURCES minecraft/GradleSpecifier_test.cpp
     LIBS Launcher_logic
     )
 
-add_executable(PackageManifest
-    mojang/PackageManifest_test.cpp
-)
-target_link_libraries(PackageManifest
-    Launcher_logic
-    Qt5::Test
-)
-target_include_directories(PackageManifest
-    PRIVATE ../cmake/UnitTest/
-)
-add_test(
-    NAME PackageManifest
-    COMMAND PackageManifest
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+if(BUILD_TESTING)
+    add_executable(PackageManifest
+        mojang/PackageManifest_test.cpp
+    )
+    target_link_libraries(PackageManifest
+        Launcher_logic
+        Qt5::Test
+    )
+    target_include_directories(PackageManifest
+        PRIVATE ../cmake/UnitTest/
+    )
+    add_test(
+        NAME PackageManifest
+        COMMAND PackageManifest
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()
 
 add_unit_test(MojangVersionFormat
     SOURCES minecraft/MojangVersionFormat_test.cpp
@@ -415,6 +412,11 @@ set(TASKS_SOURCES
     tasks/SequentialTask.h
     tasks/SequentialTask.cpp
 )
+
+add_unit_test(Task
+    SOURCES tasks/Task_test.cpp
+    LIBS Launcher_logic
+    )
 
 set(SETTINGS_SOURCES
     # Settings
@@ -492,6 +494,16 @@ set(META_SOURCES
     meta/Index.h
 )
 
+set(API_SOURCES
+    modplatform/ModAPI.h
+
+    modplatform/flame/FlameAPI.h
+    modplatform/modrinth/ModrinthAPI.h
+    
+    modplatform/helpers/NetworkModAPI.h
+    modplatform/helpers/NetworkModAPI.cpp
+)
+
 set(FTB_SOURCES
     modplatform/legacy_ftb/PackFetchTask.h
     modplatform/legacy_ftb/PackFetchTask.cpp
@@ -532,6 +544,8 @@ set(TECHNIC_SOURCES
     modplatform/technic/SingleZipPackInstallTask.cpp
     modplatform/technic/SolderPackInstallTask.h
     modplatform/technic/SolderPackInstallTask.cpp
+    modplatform/technic/SolderPackManifest.h
+    modplatform/technic/SolderPackManifest.cpp
     modplatform/technic/TechnicPackProcessor.h
     modplatform/technic/TechnicPackProcessor.cpp
 )
@@ -561,7 +575,6 @@ set(LOGIC_SOURCES
     ${NET_SOURCES}
     ${LAUNCH_SOURCES}
     ${UPDATE_SOURCES}
-    ${NOTIFICATIONS_SOURCES}
     ${NEWS_SOURCES}
     ${MINECRAFT_SOURCES}
     ${SCREENSHOTS_SOURCES}
@@ -572,6 +585,7 @@ set(LOGIC_SOURCES
     ${TOOLS_SOURCES}
     ${META_SOURCES}
     ${ICONS_SOURCES}
+    ${API_SOURCES}
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
     ${MODRINTH_SOURCES}
@@ -721,6 +735,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/VanillaPage.cpp
     ui/pages/modplatform/VanillaPage.h
 
+    ui/pages/modplatform/ModPage.cpp
+    ui/pages/modplatform/ModPage.h
+    ui/pages/modplatform/ModModel.cpp
+    ui/pages/modplatform/ModModel.h
+
     ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
     ui/pages/modplatform/atlauncher/AtlFilterModel.h
     ui/pages/modplatform/atlauncher/AtlListModel.cpp
@@ -791,8 +810,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/NewComponentDialog.h
     ui/dialogs/NewInstanceDialog.cpp
     ui/dialogs/NewInstanceDialog.h
-    ui/dialogs/NotificationDialog.cpp
-    ui/dialogs/NotificationDialog.h
     ui/pagedialog/PageDialog.cpp
     ui/pagedialog/PageDialog.h
     ui/dialogs/ProgressDialog.cpp
@@ -807,7 +824,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
-
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -832,6 +848,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LogView.h
     ui/widgets/MCModInfoFrame.cpp
     ui/widgets/MCModInfoFrame.h
+    ui/widgets/ModFilterWidget.cpp
+    ui/widgets/ModFilterWidget.h
     ui/widgets/ModListView.cpp
     ui/widgets/ModListView.h
     ui/widgets/PageContainer.cpp
@@ -881,21 +899,20 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
     ui/pages/modplatform/atlauncher/AtlPage.ui
     ui/pages/modplatform/VanillaPage.ui
+    ui/pages/modplatform/ModPage.ui
     ui/pages/modplatform/flame/FlamePage.ui
-    ui/pages/modplatform/flame/FlameModPage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/ftb/FtbPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
-    ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/MCModInfoFrame.ui
+    ui/widgets/ModFilterWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
     ui/dialogs/NewInstanceDialog.ui
-    ui/dialogs/NotificationDialog.ui
     ui/dialogs/UpdateDialog.ui
     ui/dialogs/NewComponentDialog.ui
     ui/dialogs/ProfileSelectDialog.ui
@@ -974,7 +991,7 @@ if(DEFINED Launcher_APP_BINARY_DEFS)
 endif()
 
 install(TARGETS ${Launcher_Name}
-    BUNDLE DESTINATION ${BUNDLE_DEST_DIR} COMPONENT Runtime
+    BUNDLE DESTINATION "." COMPONENT Runtime
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
 )

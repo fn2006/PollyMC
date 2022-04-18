@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QTextCharFormat>
+#include <QMenuBar>
 
 #include "updater/UpdateChecker.h"
 
@@ -134,13 +136,31 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
             warning.setInformativeText(
                 tr("Do you really want to use this path? "
                    "Selecting \"No\" will close this and not alter your instance path."));
-            warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
-            if (result == QMessageBox::Yes)
+            if (result == QMessageBox::Ok)
             {
                 ui->instDirTextBox->setText(cooked_dir);
             }
         }
+        else if(APPLICATION->isFlatpak() && raw_dir.startsWith("/run/user"))
+        {
+            QMessageBox warning;
+            warning.setText(tr("You're trying to specify an instance folder "
+                            "which was granted temporaily via Flatpak.\n"
+                            "This is known to cause problems. "
+                            "After a restart the launcher might break, "
+                            "because it will no longer have access to that directory.\n\n"
+                            "Granting PolyMC access to it via Flatseal is recommended."));
+            warning.setInformativeText(
+             tr("Do you want to proceed anyway?"));
+            warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            int result = warning.exec();
+            if (result == QMessageBox::Ok)
+            {
+                ui->instDirTextBox->setText(cooked_dir);
+            } 
+        } 
         else
         {
             ui->instDirTextBox->setText(cooked_dir);
@@ -254,11 +274,6 @@ void LauncherPage::applySettings()
 {
     auto s = APPLICATION->settings();
 
-    if (ui->resetNotificationsBtn->isChecked())
-    {
-        s->set("ShownNotifications", QString());
-    }
-
     // Updates
     s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
     s->set("UpdateChannel", m_currentUpdateChannel);
@@ -307,6 +322,8 @@ void LauncherPage::applySettings()
         s->set("ApplicationTheme", newAppTheme);
         APPLICATION->setApplicationTheme(newAppTheme, false);
     }
+
+    s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -395,6 +412,13 @@ void LauncherPage::loadSettings()
             idx++;
         }
     }
+
+    // Toolbar/menu bar settings (not applicable if native menu bar is present)
+    ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());
+#ifdef Q_OS_MACOS
+    ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
+#endif
+    ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());

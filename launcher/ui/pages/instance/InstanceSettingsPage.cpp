@@ -165,10 +165,12 @@ void InstanceSettingsPage::applySettings()
     if (javaInstall)
     {
         m_settings->set("JavaPath", ui->javaPathTextBox->text());
+        m_settings->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     }
     else
     {
         m_settings->reset("JavaPath");
+        m_settings->reset("IgnoreJavaCompatibility");
     }
 
     // Java arguments
@@ -177,7 +179,6 @@ void InstanceSettingsPage::applySettings()
     if(javaArgs)
     {
         m_settings->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
-        JavaCommon::checkJVMArgs(m_settings->get("JvmArgs").toString(), this->parentWidget());
     }
     else
     {
@@ -286,6 +287,7 @@ void InstanceSettingsPage::loadSettings()
 
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
+    ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
 
     ui->javaArgumentsGroupBox->setChecked(overrideArgs);
     ui->jvmArgsTextBox->setPlainText(m_settings->get("JvmArgs").toString());

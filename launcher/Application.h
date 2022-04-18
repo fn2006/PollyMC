@@ -104,6 +104,8 @@ public:
 
     QIcon getThemedIcon(const QString& name);
 
+    bool isFlatpak();
+
     void setIconTheme(const QString& name);
 
     std::vector<ITheme *> getValidApplicationThemes();
@@ -187,6 +189,7 @@ public slots:
         MinecraftAccountPtr accountToUse = nullptr
     );
     bool kill(InstancePtr instance);
+    void closeCurrentWindow();
 
 private slots:
     void on_windowClose();

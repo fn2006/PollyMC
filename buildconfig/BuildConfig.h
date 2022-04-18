@@ -81,13 +81,6 @@ public:
     /// User-Agent to use for uncached requests.
     QString USER_AGENT_UNCACHED;
 
-
-    /// URL for notifications
-    QString NOTIFICATION_URL;
-
-    /// Used for matching notifications
-    QString FULL_VERSION_STR;
-
     /// The git commit hash of this build
     QString GIT_COMMIT;
 
@@ -146,6 +139,12 @@ public:
     QString LEGACY_FTB_CDN_BASE_URL = "https://dist.creeper.host/FTB2/";
 
     QString ATL_DOWNLOAD_SERVER_URL = "https://download.nodecdn.net/containers/atl/";
+
+    QString TECHNIC_API_BASE_URL = "https://api.technicpack.net/";
+    /**
+     * The build that is reported to the Technic API.
+     */
+    QString TECHNIC_API_BUILD = "multimc";
 
     /**
      * \brief Converts the Version to a string.
