@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9.4)
 
 if(WIN32)
     # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
@@ -43,17 +43,33 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
+option(ENABLE_LTO "Enable Link Time Optimization" off)
+
+if(ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+
+    if(ipo_supported AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
+        message(STATUS "IPO / LTO enabled")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    elseif(ipo_supported)
+        message(STATUS "Not enabling IPO / LTO on debug builds")
+    else()
+        message(STATUS "IPO / LTO not supported: <${ipo_error}>")
+    endif()
+endif()
+
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
 set(Launcher_NEWS_RSS_URL "https://polymc.org/feed/feed.xml" CACHE STRING "URL to fetch PolyMC's news RSS feed from.")
 set(Launcher_NEWS_OPEN_URL "https://polymc.org/news" CACHE STRING "URL that gets opened when the user clicks 'More News'")
-set(Launcher_HELP_URL "https://polymc.org/wiki/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
+set(Launcher_HELP_URL "https://polymc.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
-set(Launcher_VERSION_MINOR    1)
-set(Launcher_VERSION_HOTFIX   1)
+set(Launcher_VERSION_MINOR    2)
+set(Launcher_VERSION_HOTFIX   0)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -91,8 +107,7 @@ set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for t
 set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PolyMCLauncher/" CACHE STRING "URL for the subreddit.")
 
 # Builds
-# TODO: Launcher_FORCE_BUNDLED_LIBS should be off in the future, but as of QuaZip 1.2, we can't do that yet.
-set(Launcher_FORCE_BUNDLED_LIBS ON CACHE BOOL "Prevent using system libraries, if they are available as submodules")
+set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
 
 
@@ -119,7 +134,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
-        find_package(QuaZip-Qt5 REQUIRED)
+        find_package(QuaZip-Qt5 1.3)
     endif()
     if (NOT QuaZip-Qt5_FOUND)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
@@ -149,12 +164,9 @@ add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 
-# Install the build results according to platform
-set(Launcher_PORTABLE 1 CACHE BOOL "The type of installation (Portable or System)")
-
-if (Launcher_PORTABLE)
-    # launcher/Application.cpp will use this value
-    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_PORTABLE")
+if(NOT (UNIX AND APPLE))
+    # Install "portable.txt" if selected component is "portable"
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION "." COMPONENT portable EXCLUDE_FROM_ALL)
 endif()
 
 if(UNIX AND APPLE)
@@ -163,8 +175,6 @@ if(UNIX AND APPLE)
     set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
     set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
-
-    set(BUNDLE_DEST_DIR ".")
 
     # Apps to bundle
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
@@ -190,28 +200,12 @@ if(UNIX AND APPLE)
 
 elseif(UNIX)
     set(BINARY_DEST_DIR "bin")
-    if(Launcher_PORTABLE)
-        set(LIBRARY_DEST_DIR "bin")
-        set(BUNDLE_DEST_DIR ".")
-        set(JARS_DEST_DIR "bin/jars")
-
-        # Install basic runner script
-        configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
-        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
-    else()
-        set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
-        set(JARS_DEST_DIR "share/jars")
-        set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
-        set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
-        set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
-
-        # jars path is determined on runtime, relative to "Application root path", generally /usr for Launcher_PORTABLE=0
-        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
-
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
-    endif()
+    set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
+    set(JARS_DEST_DIR "share/jars")
+    set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
+    set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
+    set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
+    set(LAUNCHER_MAN_DEST_DIR "share/man/man6" CACHE STRING "Path to the man page directory")
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
@@ -219,11 +213,22 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
+    # jars path is determined on runtime, relative to "Application root path", generally /usr or the root of the portable bundle
+    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
+
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR} RENAME "${Launcher_APP_BINARY_NAME}.6")
+
+    # Install basic runner script if component "portable" is selected
+    configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
+    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION "." RENAME ${Launcher_Name} COMPONENT portable EXCLUDE_FROM_ALL)
+
 elseif(WIN32)
     set(BINARY_DEST_DIR ".")
     set(LIBRARY_DEST_DIR ".")
     set(PLUGIN_DEST_DIR ".")
-    set(BUNDLE_DEST_DIR ".")
     set(RESOURCES_DEST_DIR ".")
     set(JARS_DEST_DIR "jars")
 
@@ -259,6 +264,8 @@ if (FORCE_BUNDLED_QUAZIP)
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
     set(QUAZIP_INSTALL 0)
     add_subdirectory(libraries/quazip) # zip manipulation library
+else()
+    message(STATUS "Using system QuaZip")
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader

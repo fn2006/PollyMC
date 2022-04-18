@@ -22,12 +22,12 @@ class ModrinthAPI : public NetworkModAPI {
                    "limit=25&"
                    "query=%2&"
                    "index=%3&"
-                   "facets=[[\"categories:%4\"],[\"versions:%5\"],[\"project_type:mod\"]]")
+                   "facets=[[\"categories:%4\"],%5[\"project_type:mod\"]]")
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
             .arg(getModLoaderString(args.mod_loader))
-            .arg(args.version);
+            .arg(getGameVersionsArray(args.versions));
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
@@ -40,21 +40,23 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(getModLoaderString(args.loader));
     };
 
-    inline auto getGameVersionsString(QList<QString> mcVersions) const -> QString
+    auto getGameVersionsArray(std::list<Version> mcVersions) const -> QString
     {
         QString s;
-        for(int i = 0; i < mcVersions.count(); i++){
-            s += mcVersions.at(i);
-            if(i < mcVersions.count() - 1)
-                s += ",";
+        for(auto& ver : mcVersions){
+            s += QString("\"versions:%1\",").arg(ver.toString());
         }
-        return s;
+        s.remove(s.length() - 1, 1); //remove last comma
+        return s.isEmpty() ? QString() : QString("[%1],").arg(s);
     }
 
     static auto getModLoaderString(ModLoaderType type) -> const QString
     {
         if (type == Unspecified)
             return "fabric, forge, quilt";
+        // TODO: remove this once Quilt drops official Fabric support
+        if (type == Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
+            return "fabric, quilt";
         return ModAPI::getModLoaderString(type);
     }
 

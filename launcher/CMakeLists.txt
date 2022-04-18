@@ -825,7 +825,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
 
-
     # GUI - widgets
     ui/widgets/Common.cpp
     ui/widgets/Common.h
@@ -849,6 +848,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LogView.h
     ui/widgets/MCModInfoFrame.cpp
     ui/widgets/MCModInfoFrame.h
+    ui/widgets/ModFilterWidget.cpp
+    ui/widgets/ModFilterWidget.h
     ui/widgets/ModListView.cpp
     ui/widgets/ModListView.h
     ui/widgets/PageContainer.cpp
@@ -907,6 +908,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/MCModInfoFrame.ui
+    ui/widgets/ModFilterWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
@@ -989,7 +991,7 @@ if(DEFINED Launcher_APP_BINARY_DEFS)
 endif()
 
 install(TARGETS ${Launcher_Name}
-    BUNDLE DESTINATION ${BUNDLE_DEST_DIR} COMPONENT Runtime
+    BUNDLE DESTINATION "." COMPONENT Runtime
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
 )
