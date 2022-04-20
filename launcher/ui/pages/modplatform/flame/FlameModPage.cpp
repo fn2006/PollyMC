@@ -48,7 +48,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     // index is used to set the sorting with the flame api
     ui->sortByBox->addItem(tr("Sort by Featured"));
     ui->sortByBox->addItem(tr("Sort by Popularity"));
-    ui->sortByBox->addItem(tr("Sort by last updated"));
+    ui->sortByBox->addItem(tr("Sort by Last Updated"));
     ui->sortByBox->addItem(tr("Sort by Name"));
     ui->sortByBox->addItem(tr("Sort by Author"));
     ui->sortByBox->addItem(tr("Sort by Downloads"));
@@ -61,9 +61,9 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
 }
 
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const -> bool
+auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader) const -> bool
 {
-    (void) loaderVer;
+    Q_UNUSED(loader);
     return ver.mcVersion.contains(mineVer);
 }
 

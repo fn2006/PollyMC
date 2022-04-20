@@ -34,6 +34,7 @@
  */
 
 #include "ModrinthPage.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui_ModPage.h"
 
 #include "ModrinthModel.h"
@@ -46,23 +47,33 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
     ui->packView->setModel(listModel);
 
     // index is used to set the sorting with the modrinth api
-    ui->sortByBox->addItem(tr("Sort by Relevence"));
+    ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Downloads"));
     ui->sortByBox->addItem(tr("Sort by Follows"));
-    ui->sortByBox->addItem(tr("Sort by last updated"));
-    ui->sortByBox->addItem(tr("Sort by newest"));
+    ui->sortByBox->addItem(tr("Sort by Last Updated"));
+    ui->sortByBox->addItem(tr("Sort by Newest"));
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems, 
-    // so it's best not to connect them in the parent's contructor...
+    // so it's best not to connect them in the parent's constructor...
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthPage::onModSelected);
 }
 
-auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const -> bool
+auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader) const -> bool
 {
-    return ver.mcVersion.contains(mineVer) && ver.loaders.contains(loaderVer);
+    auto loaderStrings = ModrinthAPI::getModLoaderStrings(loader);
+
+    auto loaderCompatible = false;
+    for (auto remoteLoader : ver.loaders)
+    {
+        if (loaderStrings.contains(remoteLoader)) {
+            loaderCompatible = true;
+            break;
+        }
+    }
+    return ver.mcVersion.contains(mineVer) && loaderCompatible;
 }
 
 // I don't know why, but doing this on the parent class makes it so that
