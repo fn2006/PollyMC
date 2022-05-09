@@ -235,6 +235,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/MigrationEligibilityStep.h
     minecraft/auth/steps/MinecraftProfileStep.cpp
     minecraft/auth/steps/MinecraftProfileStep.h
+    minecraft/auth/steps/MinecraftProfileStepMojang.cpp
+    minecraft/auth/steps/MinecraftProfileStepMojang.h
     minecraft/auth/steps/MSAStep.cpp
     minecraft/auth/steps/MSAStep.h
     minecraft/auth/steps/XboxAuthorizationStep.cpp
@@ -557,6 +559,8 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLPackInstallTask.h
     modplatform/atlauncher/ATLPackManifest.cpp
     modplatform/atlauncher/ATLPackManifest.h
+    modplatform/atlauncher/ATLShareCode.cpp
+    modplatform/atlauncher/ATLShareCode.h
 )
 
 add_unit_test(Index
