@@ -532,6 +532,8 @@ set(FLAME_SOURCES
 set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackIndex.cpp
     modplatform/modrinth/ModrinthPackIndex.h
+    modplatform/modrinth/ModrinthPackManifest.cpp
+    modplatform/modrinth/ModrinthPackManifest.h
 )
 
 set(MODPACKSCH_SOURCES
@@ -659,6 +661,8 @@ SET(LAUNCHER_SOURCES
     ui/setupwizard/JavaWizardPage.h
     ui/setupwizard/LanguageWizardPage.cpp
     ui/setupwizard/LanguageWizardPage.h
+    ui/setupwizard/PasteWizardPage.cpp
+    ui/setupwizard/PasteWizardPage.h
 
     # GUI - themes
     ui/themes/FusionTheme.cpp
@@ -774,6 +778,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/flame/FlameModPage.cpp
     ui/pages/modplatform/flame/FlameModPage.h
 
+    ui/pages/modplatform/modrinth/ModrinthPage.cpp
+    ui/pages/modplatform/modrinth/ModrinthPage.h
+    ui/pages/modplatform/modrinth/ModrinthModel.cpp
+    ui/pages/modplatform/modrinth/ModrinthModel.h
+
     ui/pages/modplatform/technic/TechnicModel.cpp
     ui/pages/modplatform/technic/TechnicModel.h
     ui/pages/modplatform/technic/TechnicPage.cpp
@@ -782,10 +791,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ImportPage.cpp
     ui/pages/modplatform/ImportPage.h
 
-    ui/pages/modplatform/modrinth/ModrinthModel.cpp
-    ui/pages/modplatform/modrinth/ModrinthModel.h
-    ui/pages/modplatform/modrinth/ModrinthPage.cpp
-    ui/pages/modplatform/modrinth/ModrinthPage.h
+    ui/pages/modplatform/modrinth/ModrinthModModel.cpp
+    ui/pages/modplatform/modrinth/ModrinthModModel.h
+    ui/pages/modplatform/modrinth/ModrinthModPage.cpp
+    ui/pages/modplatform/modrinth/ModrinthModPage.h
 
     # GUI - dialogs
     ui/dialogs/AboutDialog.cpp
@@ -883,6 +892,7 @@ SET(LAUNCHER_SOURCES
 )
 
 qt5_wrap_ui(LAUNCHER_UI
+    ui/setupwizard/PasteWizardPage.ui
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
@@ -908,6 +918,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/ftb/FtbPage.ui
+    ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
