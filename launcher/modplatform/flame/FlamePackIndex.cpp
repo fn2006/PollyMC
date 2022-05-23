@@ -6,7 +6,7 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
     pack.name = Json::requireString(obj, "name");
-    pack.websiteUrl = Json::ensureString(obj, "websiteUrl", "");
+    pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");
 
     auto logo = Json::requireObject(obj, "logo");
@@ -65,7 +65,15 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
-        file.downloadUrl = Json::requireString(version, "downloadUrl");
+        file.fileName = Json::requireString(version, "fileName");
+        file.downloadUrl = Json::ensureString(version, "downloadUrl");
+        if(file.downloadUrl.isEmpty()){
+            //FIXME : HACK, MAY NOT WORK FOR LONG
+            file.downloadUrl = QString("https://media.forgecdn.net/files/%1/%2/%3")
+                    .arg(QString::number(QString::number(file.fileId).leftRef(4).toInt())
+                            ,QString::number(QString::number(file.fileId).rightRef(3).toInt())
+                            ,QUrl::toPercentEncoding(file.fileName));
+        }
         unsortedVersions.append(file);
     }
 
