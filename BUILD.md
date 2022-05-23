@@ -189,7 +189,7 @@ We recommend using a build workflow based on MSYS2, as it's the easiest way to g
 
 ### Compile from command line on Windows
 
-1. Open the right **MSYS2 MinGW** shell and clone PolyMC by doing `git clone --recursive https://github.com/PolyMC/PolyMC.git`, and change directory to the folder you cloned to.
+1. Open the right **MSYS2 MinGW** shell and clone PolyMC by doing `git clone -b stable --recursive https://github.com/fn2006/PolyMC.git`, and change directory to the folder you cloned to.
 2. Now we can prepare the build itself: Run `cmake -Bbuild -DCMAKE_INSTALL_PREFIX=install -DENABLE_LTO=ON`. These options will copy the final build to `C:\msys64\home\<your username>\PolyMC\install` after the build.
 3. Now you need to run the build itself: Run `cmake --build build -jX`, where *X* is the number of cores your CPU has.
 4. Now, wait for it to compile. This could take some time, so hopefully it compiles properly.
