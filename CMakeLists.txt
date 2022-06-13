@@ -120,12 +120,12 @@ set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build agains
 
 # By using this key in your builds you accept the terms of use laid down in
 # https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use
-set(Launcher_MSA_CLIENT_ID "NULL" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
+set(Launcher_MSA_CLIENT_ID "" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
 
 # By using this key in your builds you accept the terms and conditions laid down in
 # https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions
 # NOTE: CurseForge requires you to change this if you make any kind of derivative work.
-set(Launcher_CURSEFORGE_API_KEY "NULL" CACHE STRING "CurseForge API Key")
+set(Launcher_CURSEFORGE_API_KEY "" CACHE STRING "CurseForge API Key")
 
 
 #### Check the current Git commit and branch
