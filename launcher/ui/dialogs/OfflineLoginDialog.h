@@ -35,7 +35,6 @@ slots:
     void onTaskProgress(qint64 current, qint64 total);
 
     void on_userTextBox_textEdited(const QString &newText);
-    void on_allowLongUsernames_stateChanged(int value);
 
 private:
     Ui::OfflineLoginDialog *ui;
