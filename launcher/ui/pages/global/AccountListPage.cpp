@@ -244,7 +244,7 @@ void AccountListPage::updateButtonStates()
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     bool hasSelection = !selection.empty();
     bool accountIsReady = false;
-    bool accountIsOnline;
+    bool accountIsOnline = false;
     if (hasSelection)
     {
         QModelIndex selected = selection.first();
