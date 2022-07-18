@@ -1,9 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ModDownloadDialog.h"
 
 #include <BaseVersion.h>
 #include <icons/IconList.h>
 #include <InstanceList.h>
 
+#include "Application.h"
 #include "ProgressDialog.h"
 #include "ReviewMessageBox.h"
 
@@ -77,18 +96,20 @@ void ModDownloadDialog::confirm()
     auto keys = modTask.keys();
     keys.sort(Qt::CaseInsensitive);
 
-    auto confirm_dialog = ReviewMessageBox::create(
-        this,
-        tr("Confirm mods to download")
-    );
+    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm mods to download"));
 
-    for(auto& task : keys){
-        confirm_dialog->appendMod(task, modTask.find(task).value()->getFilename());
+    for (auto& task : keys) {
+        confirm_dialog->appendMod({ task, modTask.find(task).value()->getFilename() });
     }
 
-    connect(confirm_dialog, &QDialog::accepted, this, &ModDownloadDialog::accept);
+    if (confirm_dialog->exec()) {
+        auto deselected = confirm_dialog->deselectedMods();
+        for (auto name : deselected) {
+            modTask.remove(name);
+        }
 
-    confirm_dialog->open();
+        this->accept();
+    }
 }
 
 void ModDownloadDialog::accept()
@@ -98,13 +119,13 @@ void ModDownloadDialog::accept()
 
 QList<BasePage *> ModDownloadDialog::getPages()
 {
-    modrinthPage = new ModrinthModPage(this, m_instance);
-    flameModPage = new FlameModPage(this, m_instance);
-    return
-    {
-        modrinthPage,
-        flameModPage
-    };
+    QList<BasePage *> pages;
+
+    pages.append(new ModrinthModPage(this, m_instance));
+    if (APPLICATION->currentCapabilities() & Application::SupportsFlame)
+        pages.append(new FlameModPage(this, m_instance));
+
+    return pages;
 }
 
 void ModDownloadDialog::addSelectedMod(const QString& name, ModDownloadTask* task)
@@ -130,6 +151,12 @@ bool ModDownloadDialog::isModSelected(const QString &name, const QString& filena
     //        as a heuristic, other than adding such info to ModDownloadTask itself?
     auto iter = modTask.find(name);
     return iter != modTask.end() && (iter.value()->getFilename() == filename);
+}
+
+bool ModDownloadDialog::isModSelected(const QString &name) const
+{
+    auto iter = modTask.find(name);
+    return iter != modTask.end();
 }
 
 ModDownloadDialog::~ModDownloadDialog()

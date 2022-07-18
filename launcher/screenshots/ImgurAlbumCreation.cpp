@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,7 +56,7 @@ void ImgurAlbumCreation::executeTask()
 {
     m_state = State::Running;
     QNetworkRequest request(m_url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     request.setRawHeader("Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str());
     request.setRawHeader("Accept", "application/json");
@@ -73,7 +74,11 @@ void ImgurAlbumCreation::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &ImgurAlbumCreation::downloadFinished);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#else
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#endif
 }
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {

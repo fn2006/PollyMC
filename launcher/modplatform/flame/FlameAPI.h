@@ -1,8 +1,17 @@
 #pragma once
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
 class FlameAPI : public NetworkModAPI {
+   public:
+    auto matchFingerprints(const QList<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr;
+    auto getModFileChangelog(int modId, int fileId) -> QString;
+
+    auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
+
+    auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* override;
+
    private:
     inline auto getSortFieldInt(QString sortString) const -> int
     {
@@ -41,6 +50,11 @@ class FlameAPI : public NetworkModAPI {
             .arg(gameVersionStr);
     };
 
+    inline auto getModInfoURL(QString& id) const -> QString override
+    {
+        return QString("https://api.curseforge.com/v1/mods/%1").arg(id);
+    };
+
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
         QString gameVersionQuery = args.mcVersions.size() == 1 ? QString("gameVersion=%1&").arg(args.mcVersions.front().toString()) : "";
@@ -53,7 +67,7 @@ class FlameAPI : public NetworkModAPI {
     };
 
    public:
-    static auto getMappedModLoader(const ModLoaderTypes loaders) -> const int
+    static auto getMappedModLoader(const ModLoaderTypes loaders) -> int
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
         if (loaders & Forge)

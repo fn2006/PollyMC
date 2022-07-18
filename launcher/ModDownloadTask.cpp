@@ -1,25 +1,56 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+*  PolyMC - Minecraft Launcher
+*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+*
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation, version 3.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "ModDownloadTask.h"
+
 #include "Application.h"
+#include "minecraft/mod/ModFolderModel.h"
 
-ModDownloadTask::ModDownloadTask(const QUrl sourceUrl,const QString filename, const std::shared_ptr<ModFolderModel> mods)
-: m_sourceUrl(sourceUrl), mods(mods), filename(filename) {
-}
+ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed)
+    : m_mod(mod), m_mod_version(version), mods(mods)
+{
+    if (is_indexed) {
+        m_update_task.reset(new LocalModUpdateTask(mods->indexDir(), m_mod, m_mod_version));
+        connect(m_update_task.get(), &LocalModUpdateTask::hasOldMod, this, &ModDownloadTask::hasOldMod);
 
-void ModDownloadTask::executeTask() {
-    setStatus(tr("Downloading mod:\n%1").arg(m_sourceUrl.toString()));
+        addTask(m_update_task);
+    }
 
     m_filesNetJob.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
-    m_filesNetJob->addNetAction(Net::Download::makeFile(m_sourceUrl, mods->dir().absoluteFilePath(filename)));
+    m_filesNetJob->setStatus(tr("Downloading mod:\n%1").arg(m_mod_version.downloadUrl));
+    
+    m_filesNetJob->addNetAction(Net::Download::makeFile(m_mod_version.downloadUrl, mods->dir().absoluteFilePath(getFilename())));
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ModDownloadTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &ModDownloadTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &ModDownloadTask::downloadFailed);
-    m_filesNetJob->start();
+
+    addTask(m_filesNetJob);
 }
 
 void ModDownloadTask::downloadSucceeded()
 {
-    emitSucceeded();
     m_filesNetJob.reset();
+    auto name = std::get<0>(to_delete);
+    auto filename = std::get<1>(to_delete);
+    if (!name.isEmpty() && filename != m_mod_version.fileName) {
+        mods->uninstallMod(filename, true);
+    }
 }
 
 void ModDownloadTask::downloadFailed(QString reason)
@@ -33,7 +64,9 @@ void ModDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
     emit progress(current, total);
 }
 
-bool ModDownloadTask::abort() {
-    return m_filesNetJob->abort();
+// This indirection is done so that we don't delete a mod before being sure it was
+// downloaded successfully!
+void ModDownloadTask::hasOldMod(QString name, QString filename)
+{
+    to_delete = {name, filename};
 }
-

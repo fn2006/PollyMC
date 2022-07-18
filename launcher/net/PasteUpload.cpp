@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Swirl <swurl@swurl.xyz>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,7 +72,7 @@ void PasteUpload::executeTask()
     QNetworkRequest request{QUrl(m_uploadUrl)};
     QNetworkReply *rep{};
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
 
     switch (m_pasteType) {
     case NullPointer: {
@@ -91,7 +92,7 @@ void PasteUpload::executeTask()
         break;
     }
     case Hastebin: {
-        request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+        request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
         rep = APPLICATION->network()->post(request, m_text);
         break;
     }
@@ -128,10 +129,13 @@ void PasteUpload::executeTask()
 
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
     connect(rep, &QNetworkReply::finished, this, &PasteUpload::downloadFinished);
-    // This function call would be a lot shorter if we were using the latest Qt
-    connect(rep,
-            static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-            this, &PasteUpload::downloadError);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    connect(rep, &QNetworkReply::errorOccurred, this, &PasteUpload::downloadError);
+#else
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &PasteUpload::downloadError);
+#endif
+
 
     m_reply = std::shared_ptr<QNetworkReply>(rep);
 

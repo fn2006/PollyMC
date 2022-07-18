@@ -6,13 +6,11 @@ if(WIN32)
 endif()
 
 project(Launcher)
-include(CTest)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
     message(FATAL_ERROR "You are building the Launcher in-source. Please separate the build tree from the source tree.")
 endif()
-
 
 ##################################### Set CMake options #####################################
 set(CMAKE_AUTOMOC ON)
@@ -34,7 +32,7 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -Werror -Wno-deprecated-declarations -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -pedantic -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 if(UNIX AND APPLE)
     set(CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 endif()
@@ -63,6 +61,16 @@ if(ENABLE_LTO)
     endif()
 endif()
 
+option(BUILD_TESTING "Build the testing tree." ON)
+
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+include(CTest)
+include(ECMAddTests)
+if (BUILD_TESTING)
+    enable_testing()
+endif()
+
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
@@ -72,8 +80,8 @@ set(Launcher_HELP_URL "https://polymc.org/wiki/help-pages/%1" CACHE STRING "URL 
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
-set(Launcher_VERSION_MINOR    3)
-set(Launcher_VERSION_HOTFIX   2)
+set(Launcher_VERSION_MINOR    4)
+set(Launcher_VERSION_HOTFIX   0)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -102,8 +110,6 @@ set(Launcher_MATRIX_URL "https://matrix.to/#/#polymc:matrix.org" CACHE STRING "U
 # Discord URL
 set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for the Discord guild.")
 
-
-
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PolyMCLauncher/" CACHE STRING "URL for the subreddit.")
 
@@ -130,9 +136,11 @@ set(Launcher_CURSEFORGE_API_KEY "" CACHE STRING "CurseForge API Key")
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
+git_get_exact_tag(Launcher_GIT_TAG)
 get_git_head_revision(Launcher_GIT_REFSPEC Launcher_GIT_COMMIT)
 
 message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
+message(STATUS "Git tag: ${Launcher_GIT_TAG}")
 message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
 set(Launcher_RELEASE_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
@@ -148,6 +156,7 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
+include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(QT_VERSION_MAJOR 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
@@ -159,19 +168,33 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
         set(FORCE_BUNDLED_QUAZIP 1)
     endif()
+
+    # Qt 6 sets these by default. Notably causes Windows APIs to use UNICODE strings.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    set(QT_VERSION_MAJOR 6)
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
+
+    if(NOT Launcher_FORCE_BUNDLED_LIBS)
+        find_package(QuaZip-Qt6 1.3 QUIET)
+    endif()
+    if (NOT QuaZip-Qt6_FOUND)
+        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
+        set(FORCE_BUNDLED_QUAZIP 1)
+    endif()
 else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-# The Qt5 cmake files don't provide its install paths, so ask qmake.
-include(QMakeQuery)
-query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
-query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
-query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
-query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
-query_qmake(QT_HOST_DATA QT_DATA_DIR)
+include(ECMQueryQt)
+ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
+# NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
@@ -192,6 +215,7 @@ if(UNIX AND APPLE)
     set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
     set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
     set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
 
@@ -207,9 +231,15 @@ if(UNIX AND APPLE)
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
     set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
+    set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "idALcUIazingvKSSsEa9U7coDVxZVx/ORpOEE/QtJfg=")
+    set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://polymc.org/feed/appcast.xml")
+
+    set(MACOSX_SPARKLE_DOWNLOAD_URL "https://github.com/sparkle-project/Sparkle/releases/download/2.1.0/Sparkle-2.1.0.tar.xz" CACHE STRING "URL to Sparkle release archive")
+    set(MACOSX_SPARKLE_SHA256 "bf6ac1caa9f8d321d5784859c88da874f28412f37fb327bc21b7b14c5d61ef94" CACHE STRING "SHA256 checksum for Sparkle release archive")
+    set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
     # directories to look for dependencies
-    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${MACOSX_SPARKLE_DIR})
 
     # install as bundle
     set(INSTALL_BUNDLE "full")
@@ -232,13 +262,13 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
-    # jars path is determined on runtime, relative to "Application root path", generally /usr or the root of the portable bundle
-    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
-
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR} RENAME "${Launcher_APP_BINARY_NAME}.6")
+
+    if(Launcher_ManPage)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR})
+    endif()
 
     # Install basic runner script if component "portable" is selected
     configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
@@ -287,12 +317,13 @@ else()
     message(STATUS "Using system QuaZip")
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
-add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # class parser library
 add_subdirectory(libraries/optional-bare)
 add_subdirectory(libraries/tomlc99) # toml parser
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
+add_subdirectory(libraries/gamemode)
+add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 
 ############################### Built Artifacts ###############################
 

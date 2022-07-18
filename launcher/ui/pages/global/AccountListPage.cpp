@@ -73,9 +73,11 @@ AccountListPage::AccountListPage(QWidget *parent)
     m_accounts = APPLICATION->accounts();
 
     ui->listView->setModel(m_accounts.get());
-    ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::MigrationColumn, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     // Expand the account column
@@ -94,7 +96,7 @@ AccountListPage::AccountListPage(QWidget *parent)
     updateButtonStates();
 
     // Xbox authentication won't work without a client identifier, so disable the button if it is missing
-    if (APPLICATION->getMSAClientID().isEmpty()) {
+    if (~APPLICATION->currentCapabilities() & Application::SupportsMSA) {
         ui->actionAddMicrosoft->setVisible(false);
         ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
     }
@@ -240,19 +242,21 @@ void AccountListPage::updateButtonStates()
 {
     // If there is no selection, disable buttons that require something selected.
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    bool hasSelection = selection.size() > 0;
+    bool hasSelection = !selection.empty();
     bool accountIsReady = false;
+    bool accountIsOnline = false;
     if (hasSelection)
     {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
+        accountIsOnline = !account->isOffline();
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionUploadSkin->setEnabled(accountIsReady);
-    ui->actionDeleteSkin->setEnabled(accountIsReady);
-    ui->actionRefresh->setEnabled(accountIsReady);
+    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
 
     if(m_accounts->defaultAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);

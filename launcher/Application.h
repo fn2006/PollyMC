@@ -90,6 +90,14 @@ public:
         Initialized
     };
 
+    enum Capability {
+        None = 0,
+
+        SupportsMSA = 1 << 0,
+        SupportsFlame = 1 << 1,
+    };
+    Q_DECLARE_FLAGS(Capabilities, Capability)
+
 public:
     Application(int &argc, char **argv);
     virtual ~Application();
@@ -154,10 +162,18 @@ public:
 
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
-    QString getJarsPath();
+    Capabilities currentCapabilities();
+
+    /*!
+     * Finds and returns the full path to a jar file.
+     * Returns a null-string if it could not be found.
+     */
+    QString getJarPath(QString jarFile);
 
     QString getMSAClientID();
-    QString getCurseKey();
+    QString getFlameAPIKey();
+    QString getUserAgent();
+    QString getUserAgentUncached();
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
@@ -236,7 +252,6 @@ private:
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::unique_ptr<MCEditTool> m_mcedit;
-    QString m_jarsPath;
     QSet<QString> m_features;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
