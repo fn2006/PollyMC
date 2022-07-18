@@ -93,8 +93,6 @@ public: /* construction */
 
     static MinecraftAccountPtr createBlankMSA();
 
-    static MinecraftAccountPtr createOffline(const QString &username);
-
     static MinecraftAccountPtr loadFromJsonV2(const QJsonObject &json);
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject &json);
 
@@ -110,8 +108,6 @@ public: /* manipulation */
     shared_qobject_ptr<AccountTask> login(QString password);
 
     shared_qobject_ptr<AccountTask> loginMSA();
-
-    shared_qobject_ptr<AccountTask> loginOffline();
 
     shared_qobject_ptr<AccountTask> refresh();
 
@@ -152,10 +148,6 @@ public: /* queries */
         return data.type == AccountType::MSA;
     }
 
-    bool isOffline() const {
-        return data.type == AccountType::Offline;
-    }
-
     bool ownsMinecraft() const {
         return data.minecraftEntitlement.ownsMinecraft;
     }
@@ -175,10 +167,6 @@ public: /* queries */
             break;
             case AccountType::MSA: {
                 return "msa";
-            }
-            break;
-            case AccountType::Offline: {
-                return "offline";
             }
             break;
             default: {

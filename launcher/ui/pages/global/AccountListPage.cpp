@@ -45,7 +45,6 @@
 #include "net/NetJob.h"
 
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/LoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -96,7 +95,7 @@ AccountListPage::AccountListPage(QWidget *parent)
     updateButtonStates();
 
     // Xbox authentication won't work without a client identifier, so disable the button if it is missing
-    if (~APPLICATION->currentCapabilities() & Application::SupportsMSA) {
+    if (APPLICATION->getMSAClientID().isEmpty()) {
         ui->actionAddMicrosoft->setVisible(false);
         ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
     }
@@ -186,22 +185,6 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
     }
 }
 
-void AccountListPage::on_actionAddOffline_triggered()
-{
-    MinecraftAccountPtr account = OfflineLoginDialog::newAccount(
-        this,
-        tr("Please enter your desired username to add your offline account.")
-    );
-
-    if (account)
-    {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
-        }
-    }
-}
-
 void AccountListPage::on_actionRemove_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
@@ -242,21 +225,19 @@ void AccountListPage::updateButtonStates()
 {
     // If there is no selection, disable buttons that require something selected.
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    bool hasSelection = !selection.empty();
+    bool hasSelection = selection.size() > 0;
     bool accountIsReady = false;
-    bool accountIsOnline = false;
     if (hasSelection)
     {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
-        accountIsOnline = !account->isOffline();
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
-    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
-    ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionUploadSkin->setEnabled(accountIsReady);
+    ui->actionDeleteSkin->setEnabled(accountIsReady);
+    ui->actionRefresh->setEnabled(accountIsReady);
 
     if(m_accounts->defaultAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);
