@@ -787,7 +787,9 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
     {
         addToFilter(sessionRef.session, tr("<SESSION ID>"));
     }
-    addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
+    if (sessionRef.access_token != "offline") {
+        addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
+    }
     if(sessionRef.client_token.size()) {
         addToFilter(sessionRef.client_token, tr("<CLIENT TOKEN>"));
     }
