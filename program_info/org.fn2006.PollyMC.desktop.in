@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Name=PollyMC
+Comment=A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
+Type=Application
+Terminal=false
+Exec=@Launcher_APP_BINARY_NAME@
+StartupNotify=true
+Icon=org.fn2006.PollyMC
+Categories=Game;
+Keywords=game;minecraft;launcher;mc;
+StartupWMClass=PollyMC
