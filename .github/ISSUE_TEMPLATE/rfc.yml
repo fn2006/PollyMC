@@ -6,38 +6,38 @@ body:
 - type: markdown
   attributes:
     value: |
-      ### Use this form to suggest a larger change for PolyMC.
+      ### Use this form to suggest a larger change for PollyMC.
 - type: textarea
   attributes:
     label: Goal
     description: Short description, 1-2 sentences.
-    placeholder: Remove the cat from the launcher.
+    placeholder: Remove the parrot from the launcher.
   validations:
     required: true
 - type: textarea
   attributes:
     label: Motivation
     description: |
-      Introduce the topic. If this is a not-well-known section of PolyMC, a detailed explanation of the background is recommended.
+      Introduce the topic. If this is a not-well-known section of PollyMC, a detailed explanation of the background is recommended.
       Some example points of discussion:
        - What specific problems are you facing right now that you're trying to address?
        - Are there any previous discussions? Link to them and summarize them (don't force your readers to read them though!).
        - Is there any precedent set by other software? If so, link to resources.
-    placeholder: I don't like cats. I think many users also don't like cats.
+    placeholder: I don't like parrots. I think many users also don't like parrots.
   validations:
     required: true
 - type: textarea
   attributes:
     label: Specification
     description: A concrete, thorough explanation of what is being planned.
-    placeholder: Remove the cat button and all references to the cat from the codebase. Including resource files.
+    placeholder: Remove the parrot button and all references to the parrot from the codebase. Including resource files.
   validations:
     required: true
 - type: textarea
   attributes:
     label: Drawbacks
     description: Carefully consider every possible objection and issue with your proposal. This section should be updated as feedback comes in from discussion.
-    placeholder: Some users might like cats.
+    placeholder: Some users might like parrots.
   validations:
     required: true
 - type: textarea
@@ -47,14 +47,14 @@ body:
       Are there any portions of your proposal which need to be discussed with the community before the RFC can proceed? 
       Be careful here -- an RFC with a lot of remaining questions is likely to be stalled. 
       If your RFC is mostly unresolved questions and not too much substance, it may not be ready.
-    placeholder: Do a lot of users care about the cat?
+    placeholder: Do a lot of users care about the parrot?
   validations:
     required: true
 - type: textarea
   attributes:
     label: Alternatives Considered
     description: A list of alternatives, that have been considered and offer equal or similar features to the proposed change.
-    placeholder: Maybe the cat could be replaced with an axolotl?
+    placeholder: Maybe the parrot could be replaced with a dog?
   validations:
     required: true
 - type: checkboxes
