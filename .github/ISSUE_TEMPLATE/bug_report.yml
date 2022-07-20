@@ -5,8 +5,6 @@ body:
 - type: markdown
   attributes:
     value: |
-      If you need help with running Minecraft, please visit us on our Discord before making a bug report.
-
       Before submitting a bug report, please make sure you have read this *entire* form, and that:
       * You have read the [PolyMC wiki](https://polymc.org/wiki/) and it has not answered your question.
       * Your bug is not caused by Minecraft or any mods you have installed.
@@ -25,23 +23,23 @@ body:
     - Other
 - type: textarea
   attributes:
-    label: Version of PolyMC
-    description: The version of PolyMC used in the bug report.
-    placeholder: PolyMC 1.3.2
+    label: Version of PollyMC
+    description: The version of PollyMC used in the bug report.
+    placeholder: PollyMC 1.4.0
   validations:
     required: true
 - type: textarea
   attributes:
     label: Description of bug
     description: What did you expect to happen, what happened, and why is it incorrect?
-    placeholder: The cat button should show a cat, but it showed a dog instead!
+    placeholder: The parrot button should show a parrot, but it showed a cat instead!
   validations:
     required: true
 - type: textarea
   attributes:
     label: Steps to reproduce
     description: A bulleted list, or an exported instance if relevant.
-    placeholder: "* Press the cat button"
+    placeholder: "* Press the parrot button"
   validations:
     required: true
 - type: textarea
