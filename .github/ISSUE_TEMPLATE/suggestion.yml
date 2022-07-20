@@ -5,26 +5,26 @@ body:
 - type: markdown
   attributes:
     value: |
-      ### Use this form to suggest a feature for PolyMC.
+      ### Use this form to suggest a feature for PollyMC.
 - type: input
   attributes:
     label: Role
-    description: In what way do you use PolyMC that needs this feature?
+    description: In what way do you use PollyMC that needs this feature?
     placeholder: I play modded Minecraft.
   validations:
     required: true
 - type: input
   attributes:
     label: Suggestion
-    description: What do you want PolyMC to do?
-    placeholder: I want the cat button to meow.
+    description: What do you want PollyMC to do?
+    placeholder: I want the parrot button to squawk.
   validations:
     required: true
 - type: input
   attributes:
     label: Benefit
-    description: Why do you need PolyMC to do this?
-    placeholder: so that I can always hear a cat when I need to.
+    description: Why do you need PollyMC to do this?
+    placeholder: so that I can always hear a parrot when I need to.
   validations:
     required: true
 - type: checkboxes
