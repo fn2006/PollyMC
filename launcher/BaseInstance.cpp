@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +39,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
+#include <QRegularExpression>
 
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -80,6 +82,14 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 
     m_settings->registerPassthrough(globalSettings->getSetting("ConsoleMaxLines"), nullptr);
     m_settings->registerPassthrough(globalSettings->getSetting("ConsoleOverflowStop"), nullptr);
+
+    // Managed Packs
+    m_settings->registerSetting("ManagedPack", false);
+    m_settings->registerSetting("ManagedPackType", "");
+    m_settings->registerSetting("ManagedPackID", "");
+    m_settings->registerSetting("ManagedPackName", "");
+    m_settings->registerSetting("ManagedPackVersionID", "");
+    m_settings->registerSetting("ManagedPackVersionName", "");
 }
 
 QString BaseInstance::getPreLaunchCommand()
@@ -95,6 +105,46 @@ QString BaseInstance::getWrapperCommand()
 QString BaseInstance::getPostExitCommand()
 {
     return settings()->get("PostExitCommand").toString();
+}
+
+bool BaseInstance::isManagedPack()
+{
+    return settings()->get("ManagedPack").toBool();
+}
+
+QString BaseInstance::getManagedPackType()
+{
+    return settings()->get("ManagedPackType").toString();
+}
+
+QString BaseInstance::getManagedPackID()
+{
+    return settings()->get("ManagedPackID").toString();
+}
+
+QString BaseInstance::getManagedPackName()
+{
+    return settings()->get("ManagedPackName").toString();
+}
+
+QString BaseInstance::getManagedPackVersionID()
+{
+    return settings()->get("ManagedPackVersionID").toString();
+}
+
+QString BaseInstance::getManagedPackVersionName()
+{
+    return settings()->get("ManagedPackVersionName").toString();
+}
+
+void BaseInstance::setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version)
+{
+    settings()->set("ManagedPack", true);
+    settings()->set("ManagedPackType", type);
+    settings()->set("ManagedPackID", id);
+    settings()->set("ManagedPackName", name);
+    settings()->set("ManagedPackVersionID", versionId);
+    settings()->set("ManagedPackVersionName", version);
 }
 
 int BaseInstance::getConsoleMaxLines() const
@@ -286,7 +336,7 @@ QString BaseInstance::name() const
 
 QString BaseInstance::windowTitle() const
 {
-    return BuildConfig.LAUNCHER_NAME + ": " + name().replace(QRegExp("[ \n\r\t]+"), " ");
+    return BuildConfig.LAUNCHER_NAME + ": " + name().replace(QRegularExpression("\\s+"), " ");
 }
 
 // FIXME: why is this here? move it to MinecraftInstance!!!

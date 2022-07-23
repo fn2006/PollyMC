@@ -24,6 +24,7 @@
 #include <windows.h>
 #endif
 
+QString stripVariableEntries(QString name, QString target, QString remove);
 QProcessEnvironment CleanEnviroment();
 
 class JavaUtils : public QObject
@@ -39,4 +40,6 @@ public:
 #ifdef Q_OS_WIN
     QList<JavaInstallPtr> FindJavaFromRegistryKey(DWORD keyType, QString keyName, QString keyJavaDir, QString subkeySuffix = "");
 #endif
+
+    static QString getJavaCheckPath();
 };
