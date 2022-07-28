@@ -10,4 +10,6 @@ Binaries can be found in releases.
 
 Workaround for downloading mods from CurseForge not working [here](https://github.com/fn2006/PollyMC/wiki/CurseForge-Workaround).
 
+Workaround for downloading mods from Modrinth not working [here](https://github.com/fn2006/PollyMC/wiki/Modrinth-Workaround).
+
 To build this yourself, follow the instructions on the PolyMC website but clone this repo instead.
