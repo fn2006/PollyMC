@@ -36,14 +36,14 @@ let
     libGL
   ];
 
-  # This variable will be passed to Minecraft by PolyMC
+  # This variable will be passed to Minecraft by PollyMC
   gameLibraryPath = libpath + ":/run/opengl-driver/lib";
 
   javaPaths = lib.makeSearchPath "bin/java" ([ jdk jdk8 ] ++ extraJDKs);
 in
 
 stdenv.mkDerivation rec {
-  pname = "polymc";
+  pname = "pollymc";
   inherit version;
 
   src = lib.cleanSource self;
@@ -70,7 +70,7 @@ stdenv.mkDerivation rec {
   # we have to check if the system is NixOS before adding stdenv.cc.cc.lib (#923)
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    wrapQtApp $out/bin/polymc \
+    wrapQtApp $out/bin/pollymc \
       --run '[ -f /etc/NIXOS ] && export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"' \
       --prefix LD_LIBRARY_PATH : ${gameLibraryPath} \
       --prefix POLYMC_JAVA_PATHS : ${javaPaths} \
@@ -78,9 +78,9 @@ stdenv.mkDerivation rec {
   '';
 
   meta = with lib; {
-    homepage = "https://polymc.org/";
-    downloadPage = "https://polymc.org/download/";
-    changelog = "https://github.com/PolyMC/PolyMC/releases";
+    homepage = "https://github.com/fn2006/PollyMC";
+    downloadPage = "https://github.com/fn2006/PollyMC/releases";
+    changelog = "https://github.com/fn2006/PollyMC/releases";
     description = "A free, open source launcher for Minecraft";
     longDescription = ''
       Allows you to have multiple, separate instances of Minecraft (each with
