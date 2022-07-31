@@ -77,7 +77,7 @@ void ElybyProfileStep::onRequestDone(
         }
         return;
     }
-    if(!Parsers::parseMinecraftProfile(data, m_data->minecraftProfile)) {
+    if(!Parsers::parseMinecraftProfileMojang(data, m_data->minecraftProfile)) {
         m_data->minecraftProfile = MinecraftProfile();
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,
@@ -85,8 +85,6 @@ void ElybyProfileStep::onRequestDone(
         );
         return;
     }
-
-    m_data->minecraftProfile.skin.url = QString("http://skinsystem.ely.by/skins/" + m_data->profileName());
 
     emit finished(
         AccountTaskState::STATE_WORKING,
