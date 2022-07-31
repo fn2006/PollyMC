@@ -48,6 +48,7 @@
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/LoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
+#include "ui/dialogs/ElybyLoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/SkinUploadDialog.h"
 
@@ -191,6 +192,22 @@ void AccountListPage::on_actionAddOffline_triggered()
     MinecraftAccountPtr account = OfflineLoginDialog::newAccount(
         this,
         tr("Please enter your desired username to add your offline account.")
+    );
+
+    if (account)
+    {
+        m_accounts->addAccount(account);
+        if (m_accounts->count() == 1) {
+            m_accounts->setDefaultAccount(account);
+        }
+    }
+}
+
+void AccountListPage::on_actionAddElyby_triggered()
+{
+    MinecraftAccountPtr account = ElybyLoginDialog::newAccount(
+        this,
+        tr("Please enter your Ely.by account email and password to add your account.")
     );
 
     if (account)
