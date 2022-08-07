@@ -332,7 +332,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
             }
 
             case MigrationColumn: {
-                if(account->isMSA() || account->isOffline()) {
+                if(!account->isMojang()) {
                     return tr("N/A", "Can Migrate?");
                 }
                 if (account->canMigrate()) {

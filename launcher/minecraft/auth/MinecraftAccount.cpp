@@ -51,6 +51,7 @@
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
 #include "flows/Offline.h"
+#include "flows/Elyby.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
     data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
@@ -103,6 +104,17 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
     account->data.minecraftProfile.id = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
+    return account;
+}
+
+MinecraftAccountPtr MinecraftAccount::createElyby(const QString &username)
+{
+    MinecraftAccountPtr account = new MinecraftAccount();
+    account->data.type = AccountType::Elyby;
+    account->data.yggdrasilToken.extra["userName"] = username;
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.minecraftEntitlement.ownsMinecraft = true;
+    account->data.minecraftEntitlement.canPlayMinecraft = true;
     return account;
 }
 
@@ -162,6 +174,17 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline() {
     return m_currentTask;
 }
 
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginElyby(QString password) {
+    Q_ASSERT(m_currentTask.get() == nullptr);
+
+    m_currentTask.reset(new ElybyLogin(&data, password));
+    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    emit activityChanged(true);
+    return m_currentTask;
+}
+
 shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     if(m_currentTask) {
         return m_currentTask;
@@ -172,6 +195,9 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     }
     else if(data.type == AccountType::Offline) {
         m_currentTask.reset(new OfflineRefresh(&data));
+    }
+    else if(data.type == AccountType::Elyby) {
+        m_currentTask.reset(new ElybyRefresh(&data));
     }
     else {
         m_currentTask.reset(new MojangRefresh(&data));

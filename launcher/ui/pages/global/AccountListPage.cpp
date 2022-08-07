@@ -48,6 +48,7 @@
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/LoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
+#include "ui/dialogs/ElybyLoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/SkinUploadDialog.h"
 
@@ -202,6 +203,22 @@ void AccountListPage::on_actionAddOffline_triggered()
     }
 }
 
+void AccountListPage::on_actionAddElyby_triggered()
+{
+    MinecraftAccountPtr account = ElybyLoginDialog::newAccount(
+        this,
+        tr("Please enter your Ely.by account email and password to add your account.")
+    );
+
+    if (account)
+    {
+        m_accounts->addAccount(account);
+        if (m_accounts->count() == 1) {
+            m_accounts->setDefaultAccount(account);
+        }
+    }
+}
+
 void AccountListPage::on_actionRemove_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
@@ -245,17 +262,20 @@ void AccountListPage::updateButtonStates()
     bool hasSelection = !selection.empty();
     bool accountIsReady = false;
     bool accountIsOnline = false;
+    bool accountIsElyby = false;
     if (hasSelection)
     {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
         accountIsOnline = !account->isOffline();
+        accountIsElyby = account->isElyby();
+
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
-    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline && !accountIsElyby);
+    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline && !accountIsElyby);
     ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
 
     if(m_accounts->defaultAccount().get() == nullptr) {
