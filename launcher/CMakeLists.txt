@@ -270,6 +270,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/LauncherPartLaunch.h
     minecraft/launch/MinecraftServerTarget.cpp
     minecraft/launch/MinecraftServerTarget.h
+    minecraft/launch/InjectAuthlib.cpp
+    minecraft/launch/InjectAuthlib.h
     minecraft/launch/PrintInstanceInfo.cpp
     minecraft/launch/PrintInstanceInfo.h
     minecraft/launch/ReconstructAssets.cpp

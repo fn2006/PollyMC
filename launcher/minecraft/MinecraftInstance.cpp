@@ -348,6 +348,7 @@ QStringList MinecraftInstance::extraArguments() const
     if (!addn.isEmpty()) {
         list.append(addn);
     }
+
     auto agents = m_components->getProfile()->getAgents();
     for (auto agent : agents)
     {
@@ -355,6 +356,13 @@ QStringList MinecraftInstance::extraArguments() const
         agent->library()->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:"+jar[0]+(agent->argument().isEmpty() ? "" : "="+agent->argument()));
     }
+
+    // TODO: figure out how polymc's javaagent system works and use it instead of this hack
+    if (m_injector) {
+        list.append("-javaagent:"+m_injector->javaArg);
+        list.append("-Dauthlibinjector.noShowServerName");
+    }
+
     return list;
 }
 
@@ -972,7 +980,14 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         if(!session->demo) {
             process->appendStep(new ClaimAccount(pptr, session));
         }
+
+        // authlib patch
+        if (session->user_type == "elyby")
+        {
+            process->appendStep(new InjectAuthlib(pptr, &m_injector));
+        }
         process->appendStep(new Update(pptr, Net::Mode::Online));
+
     }
     else
     {
