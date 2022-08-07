@@ -24,10 +24,10 @@ void YggdrasilStep::rehydrate() {
 
 void YggdrasilStep::perform() {
     if(m_password.size()) {
-        m_yggdrasil->login(m_password);
+        m_yggdrasil->login(m_password, "https://authserver.mojang.com/");
     }
     else {
-        m_yggdrasil->refresh();
+        m_yggdrasil->refresh("https://authserver.mojang.com/");
     }
 }
 
