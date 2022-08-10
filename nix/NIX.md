@@ -3,29 +3,29 @@
 To import with flakes use
 ```nix
 inputs = {
-  polymc.url = "github:PolyMC/PolyMC";
+  pollymc.url = "github:fn2006/PollyMC";
 };
 
 ...
 
-nixpkgs.overlays = [ inputs.polymc.overlay ]; ## Within configuration.nix
-environment.systemPackages = with pkgs; [ polymc ]; ##
+nixpkgs.overlays = [ inputs.pollymc.overlay ]; ## Within configuration.nix
+environment.systemPackages = with pkgs; [ pollymc ]; ##
 ```
 
 To import without flakes use channels:
 
 ```
-nix-channel --add https://github.com/PolyMC/PolyMC/archive/master.tar.gz polymc
-nix-channel --update polymc
-nix-env -iA polymc
+nix-channel --add https://github.com/fn2006/PollyMC/archive/master.tar.gz pollymc
+nix-channel --update pollymc
+nix-env -iA pollymc
 ```
 
 or alternatively you can use
 
 ```
 nixpkgs.overlays = [
-  (import (builtins.fetchTarball "https://github.com/PolyMC/PolyMC/archive/develop.tar.gz")).overlay
+  (import (builtins.fetchTarball "https://github.com/fn2006/PollyMC/archive/develop.tar.gz")).overlay
 ];
 
-environment.systemPackages = with pkgs; [ polymc ];
+environment.systemPackages = with pkgs; [ pollymc ];
 ```

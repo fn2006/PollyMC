@@ -95,6 +95,8 @@ public: /* construction */
 
     static MinecraftAccountPtr createOffline(const QString &username);
 
+    static MinecraftAccountPtr createElyby(const QString &username);
+
     static MinecraftAccountPtr loadFromJsonV2(const QJsonObject &json);
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject &json);
 
@@ -112,6 +114,8 @@ public: /* manipulation */
     shared_qobject_ptr<AccountTask> loginMSA();
 
     shared_qobject_ptr<AccountTask> loginOffline();
+
+    shared_qobject_ptr<AccountTask> loginElyby(QString password);
 
     shared_qobject_ptr<AccountTask> refresh();
 
@@ -152,8 +156,16 @@ public: /* queries */
         return data.type == AccountType::MSA;
     }
 
+    bool isMojang() const {
+        return data.type == AccountType::Mojang;
+    }
+
     bool isOffline() const {
         return data.type == AccountType::Offline;
+    }
+
+    bool isElyby() const {
+        return data.type == AccountType::Elyby;
     }
 
     bool ownsMinecraft() const {
@@ -179,6 +191,9 @@ public: /* queries */
             break;
             case AccountType::Offline: {
                 return "offline";
+            }
+            case AccountType::Elyby: {
+                return "elyby";
             }
             break;
             default: {

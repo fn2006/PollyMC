@@ -1,5 +1,5 @@
 {
-  description = "A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once (Fork of MultiMC)";
+  description = "A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once (Fork of PolyMC)";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -22,14 +22,14 @@
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
 
       packagesFn = pkgs: rec {
-        polymc = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
-        polymc-qt6 = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
+        pollymc = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
+        pollymc-qt6 = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
       };
     in
     {
       packages = forAllSystems (system:
         let packages = packagesFn pkgs.${system}; in
-        packages // { default = packages.polymc; }
+        packages // { default = packages.pollymc; }
       );
 
       overlay = final: packagesFn;

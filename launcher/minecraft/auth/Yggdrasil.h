@@ -40,8 +40,8 @@ public:
     );
     virtual ~Yggdrasil() = default;
 
-    void refresh();
-    void login(QString password);
+    void refresh(QString baseUrl);
+    void login(QString password, QString baseUrl);
 
     struct Error
     {

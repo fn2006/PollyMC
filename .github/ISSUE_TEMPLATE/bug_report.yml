@@ -25,7 +25,14 @@ body:
   attributes:
     label: Version of PollyMC
     description: The version of PollyMC used in the bug report.
-    placeholder: PollyMC 1.4.0
+    placeholder: PollyMC 1.4.1
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Version of Qt
+    description: The version of Qt used in the bug report. You can find it in Help -> About PollyMC -> About Qt.
+    placeholder: Qt 6.3.0
   validations:
     required: true
 - type: textarea

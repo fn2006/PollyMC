@@ -321,7 +321,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     {
         // Root path is used for updates and portable data
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         QDir foo(FS::PathCombine(binPath, "..")); // typically portable-root or /usr
         m_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
@@ -869,6 +869,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_metacache->addBase("translations", QDir("translations").absolutePath());
         m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
         m_metacache->addBase("meta", QDir("meta").absolutePath());
+        m_metacache->addBase("injectors", QDir("injectors").absolutePath());
         m_metacache->Load();
         qDebug() << "<> Cache initialized.";
     }
