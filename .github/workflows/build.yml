@@ -27,7 +27,7 @@ jobs:
             qt_host: linux
             qt_version: '6.2.4'
             qt_modules: 'qt5compat qtimageformats'
-            qt_path: /home/runner/work/PolyMC/Qt
+            qt_path: /home/runner/work/PollyMC/Qt
 
           - os: windows-2022
             name: "Windows-Legacy"
@@ -45,7 +45,7 @@ jobs:
             qt_host: mac
             qt_version: '6.3.0'
             qt_modules: 'qt5compat qtimageformats'
-            qt_path: /Users/runner/work/PolyMC/Qt
+            qt_path: /Users/runner/work/PollyMC/Qt
 
     runs-on: ${{ matrix.os }}
 
@@ -229,9 +229,9 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }}
 
           cd ${{ env.INSTALL_DIR }}
-          chmod +x "PolyMC.app/Contents/MacOS/polymc"
-          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PolyMC.app/Contents/MacOS/polymc"
-          tar -czf ../PolyMC.tar.gz *
+          chmod +x "PollyMC.app/Contents/MacOS/pollymc"
+          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PollyMC.app/Contents/MacOS/pollymc"
+          tar -czf ../PollyMC.tar.gz *
 
       - name: Make Sparkle signature (macOS)
         if: runner.os == 'macOS'
@@ -239,7 +239,7 @@ jobs:
           if [ '${{ secrets.SPARKLE_ED25519_KEY }}' != '' ]; then
             brew install openssl@3
             echo '${{ secrets.SPARKLE_ED25519_KEY }}' > ed25519-priv.pem
-            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PolyMC.tar.gz -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PollyMC.tar.gz -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
             rm ed25519-priv.pem
             cat >> $GITHUB_STEP_SUMMARY << EOF
           ### Artifact Information :information_source:
@@ -285,7 +285,7 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
 
           cd ${{ env.INSTALL_DIR }}
-          tar --owner root --group root -czf ../PolyMC.tar.gz *
+          tar --owner root --group root -czf ../PollyMC.tar.gz *
 
       - name: Package (Linux, portable)
         if: runner.os == 'Linux'
@@ -294,7 +294,7 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
           cd ${{ env.INSTALL_PORTABLE_DIR }}
-          tar -czf ../PolyMC-portable.tar.gz *
+          tar -czf ../PollyMC-portable.tar.gz *
 
       - name: Package AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
@@ -302,7 +302,7 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
 
-          export OUTPUT="PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
+          export OUTPUT="PollyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
           chmod +x linuxdeploy-*.AppImage
 
@@ -313,7 +313,7 @@ jobs:
 
           cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
 
-          cp -r /home/runner/work/PolyMC/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
+          cp -r /home/runner/work/PollyMC/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
           
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
           cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}//usr/lib/
@@ -325,7 +325,7 @@ jobs:
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
           export LD_LIBRARY_PATH
 
-          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
+          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.fn2006.PollyMC.svg
 
       ##
       # UPLOAD BUILDS
@@ -335,63 +335,63 @@ jobs:
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC.tar.gz
+          name: PollyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PollyMC.tar.gz
 
       - name: Upload binary zip (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PollyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload binary zip (Windows, portable)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PollyMC-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_PORTABLE_DIR }}/**
 
       - name: Upload installer (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC-Setup.exe
+          name: PollyMC-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PollyMC-Setup.exe
 
       - name: Upload binary tarball (Linux, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC.tar.gz
+          name: PollyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PollyMC.tar.gz
 
       - name: Upload binary tarball (Linux, portable, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC-portable.tar.gz
+          name: PollyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PollyMC-portable.tar.gz
 
       - name: Upload binary tarball (Linux, Qt 6)
         if: runner.os == 'Linux' && matrix.qt_ver !=5
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-Qt6-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC.tar.gz
+          name: PollyMC-${{ runner.os }}-Qt6-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PollyMC.tar.gz
 
       - name: Upload binary tarball (Linux, portable, Qt 6)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-Qt6-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC-portable.tar.gz
+          name: PollyMC-${{ runner.os }}-Qt6-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PollyMC-portable.tar.gz
 
       - name: Upload AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
-          path: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+          name: PollyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+          path: PollyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
 
 

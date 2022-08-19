@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>org.fn2006.PollyMC</id>
+  <provides>
+    <id>org.fn2006.PollyMC</id>
+  </provides>
+  <launchable type="desktop-id">org.fn2006.PollyMC.desktop</launchable>
+  <name>PollyMC</name>
+  <developer_name>fn2006</developer_name>
+  <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>PollyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Easily install game modifications, such as Fabric or Forge</li>
+      <li>Control your java settings</li>
+      <li>Manage worlds and resource packs from the launcher</li>
+      <li>See logs and other details easily</li>
+      <li>Kill Minecraft in case of a crash/freeze</li>
+      <li>Isolate minecraft instances to keep everything clean</li>
+      <li>Install mods directly from the launcher</li>
+    </ul>
+  </description>
+  <releases>
+    <release version="@Launcher_RELEASE_VERSION_NAME@" date="@Launcher_RELEASE_TIMESTAMP@"></release>
+  </releases>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-fantasy">moderate</content_attribute>
+    <content_attribute id="social-chat">intense</content_attribute>
+  </content_rating>
+</component>

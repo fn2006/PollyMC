@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'true'
-          path: 'PolyMC-source'
+          path: 'PollyMC-source'
       - name: Download artifacts
         uses: actions/download-artifact@v3
       - name: Grab and store version
@@ -34,25 +34,25 @@ jobs:
           echo "VERSION=$tag_name" >> $GITHUB_ENV
       - name: Package artifacts properly
         run: |
-          mv ${{ github.workspace }}/PolyMC-source PolyMC-${{ env.VERSION }}
-          mv PolyMC-Linux-Qt6-Portable*/PolyMC-portable.tar.gz PolyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-          mv PolyMC-Linux-Qt6*/PolyMC.tar.gz PolyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
-          mv PolyMC-Linux-Portable*/PolyMC-portable.tar.gz PolyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
-          mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
-          mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-          mv PolyMC-macOS*/PolyMC.tar.gz PolyMC-macOS-${{ env.VERSION }}.tar.gz
+          mv ${{ github.workspace }}/PollyMC-source PollyMC-${{ env.VERSION }}
+          mv PollyMC-Linux-Qt6-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux*/PollyMC.tar.gz PollyMC-Linux-${{ env.VERSION }}.tar.gz
+          mv PollyMC-*.AppImage/PollyMC-*.AppImage PollyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
+          mv PollyMC-macOS*/PollyMC.tar.gz PollyMC-macOS-${{ env.VERSION }}.tar.gz
 
-          tar -czf PolyMC-${{ env.VERSION }}.tar.gz PolyMC-${{ env.VERSION }}
+          tar -czf PollyMC-${{ env.VERSION }}.tar.gz PollyMC-${{ env.VERSION }}
 
-          for d in PolyMC-Windows-*; do
+          for d in PollyMC-Windows-*; do
             cd "${d}" || continue
             LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PolyMC-Windows"
+            NAME="PollyMC-Windows"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
-            test -z "${INST}" || mv PolyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -z "${INST}" || mv PollyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
             cd ..
           done
@@ -64,20 +64,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: PolyMC ${{ env.VERSION }}
+          name: PollyMC ${{ env.VERSION }}
           draft: true
           prerelease: false
           files: |
-            PolyMC-Linux-${{ env.VERSION }}.tar.gz
-            PolyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
-            PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-            PolyMC-Windows-Legacy-${{ env.VERSION }}.zip
-            PolyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
-            PolyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PolyMC-Windows-Legacy-Portable-${{ env.VERSION }}.zip
-            PolyMC-Windows-Legacy-Setup-${{ env.VERSION }}.exe
-            PolyMC-Windows-${{ env.VERSION }}.zip
-            PolyMC-Windows-Portable-${{ env.VERSION }}.zip
-            PolyMC-Windows-Setup-${{ env.VERSION }}.exe
-            PolyMC-macOS-${{ env.VERSION }}.tar.gz
-            PolyMC-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
+            PollyMC-Windows-Legacy-${{ env.VERSION }}.zip
+            PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
+            PollyMC-Windows-Legacy-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-Legacy-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-${{ env.VERSION }}.zip
+            PollyMC-Windows-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-Setup-${{ env.VERSION }}.exe
+            PollyMC-macOS-${{ env.VERSION }}.tar.gz
+            PollyMC-${{ env.VERSION }}.tar.gz
