@@ -864,6 +864,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_metacache->addBase("ModpacksCHPacks", QDir("cache/ModpacksCHPacks").absolutePath());
         m_metacache->addBase("TechnicPacks", QDir("cache/TechnicPacks").absolutePath());
         m_metacache->addBase("FlamePacks", QDir("cache/FlamePacks").absolutePath());
+        m_metacache->addBase("FlameMods", QDir("cache/FlameMods").absolutePath());
         m_metacache->addBase("ModrinthPacks", QDir("cache/ModrinthPacks").absolutePath());
         m_metacache->addBase("root", QDir::currentPath());
         m_metacache->addBase("translations", QDir("translations").absolutePath());
@@ -1260,6 +1261,9 @@ bool Application::launch(
         }
         connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
         connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
+        connect(controller.get(), &LaunchController::aborted, this, [this] {
+            controllerFailed(tr("Aborted"));
+        });
         addRunningInstance();
         controller->start();
         return true;
