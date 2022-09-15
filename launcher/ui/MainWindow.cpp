@@ -406,7 +406,7 @@ public:
         actionCAT->setCheckable(true);
         actionCAT->setIcon(APPLICATION->getThemedIcon("cat"));
         actionCAT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Meow"));
-        actionCAT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "It's a fluffy kitty :3"));
+        actionCAT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "It's a pretty parrot :D"));
         actionCAT->setPriority(QAction::LowPriority);
         all_actions.append(&actionCAT);
 

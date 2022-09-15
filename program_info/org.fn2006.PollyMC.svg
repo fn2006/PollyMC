@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg99"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="org.fn2006.PollyMC.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview101"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="12.697086"
+     inkscape:cx="35.638098"
+     inkscape:cy="31.345775"
+     inkscape:window-width="1920"
+     inkscape:window-height="994"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g5269" />
+  <defs
+     id="defs96">
+    <inkscape:path-effect
+       effect="powerclip"
+       id="path-effect5638"
+       is_visible="true"
+       lpeversion="1"
+       inverse="true"
+       flatten="false"
+       hide_clip="false"
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths." />
+    <inkscape:path-effect
+       effect="powerclip"
+       id="path-effect5562"
+       is_visible="true"
+       lpeversion="1"
+       inverse="true"
+       flatten="false"
+       hide_clip="false"
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths." />
+    <inkscape:path-effect
+       effect="powerclip"
+       id="path-effect5535"
+       is_visible="true"
+       lpeversion="1"
+       inverse="true"
+       flatten="false"
+       hide_clip="false"
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths." />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g5269"
+       clip-path="none"
+       transform="matrix(1.25,0,0,1.25,-8,-10.5)">
+      <path
+         id="path300"
+         style="fill:#8acb01"
+         d="m 8,16 c 0,12 0,24 0,36 8.010417,0 16.020833,0 24.03125,0 0,-0.8 0,-1.6 0,-2.4 3.714062,0 7.428125,0 11.142187,0 0,-0.8 0,-1.6 0,-2.4 4.275521,0 8.551042,0 12.826563,0 C 56,36.8 56,26.4 56,16 40,16 24,16 8,16 Z"
+         inkscape:label="head" />
+      <path
+         id="rect3493"
+         style="fill:#b0af8d;stroke-width:1.39562"
+         inkscape:label="cheek"
+         d="M 19.959999,28.879064 H 32.253197 V 52 H 19.959999 Z" />
+      <path
+         id="rect3491"
+         inkscape:label="eye"
+         d="M 19.960001,28 H 32.333299 V 40 H 19.960001 Z"
+         style="stroke-width:1.00871" />
+      <path
+         id="path352"
+         style="display:inline;fill:#3b3b3b;fill-opacity:1;stroke-width:1.00922"
+         d="m 32,28 c 0,7.333333 0,14.666667 0,22 4,0 8,0 12,0 0,-0.814583 0,-1.629167 0,-2.44375 4,0 8,0 12,0 C 56,41.0375 56,34.51875 56,28 48,28 40,28 32,28 Z"
+         inkscape:label="beak" />
+    </g>
+  </g>
+</svg>
