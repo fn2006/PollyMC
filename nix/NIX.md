@@ -5,7 +5,7 @@ To import with flakes use
 ```nix
 {
   inputs = {
-    polymc.url = "github:fn2006/PollyMC";
+    pollymc.url = "github:fn2006/PollyMC";
   };
 
 ...
