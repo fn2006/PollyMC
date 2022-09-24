@@ -1,4 +1,4 @@
-# PolyMC
+## PolyMC
 
      PolyMC - Minecraft Launcher
      Copyright (C) 2021-2022 PolyMC Contributors
@@ -32,7 +32,7 @@
          See the License for the specific language governing permissions and
          limitations under the License.
 
-# MinGW-w64 runtime (Windows)
+## MinGW-w64 runtime (Windows)
 
     Copyright (c) 2009, 2010, 2011, 2012, 2013 by the mingw-w64 project
 
@@ -74,14 +74,14 @@
 
     Information on third party licenses used in MinGW-w64 can be found in its COPYING.MinGW-w64-runtime.txt.
 
-# Qt 5/6
+## Qt 5/6
 
     Copyright (C) 2022 The Qt Company Ltd and other contributors.
     Contact: https://www.qt.io/licensing
 
     Licensed under LGPL v3
 
-# libnbt++
+## libnbt++
 
     libnbt++ - A library for the Minecraft Named Binary Tag format.
     Copyright (C) 2013, 2015  ljfa-ag
@@ -99,7 +99,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with libnbt++.  If not, see <http://www.gnu.org/licenses/>.
 
-# rainbow (KGuiAddons)
+## rainbow (KGuiAddons)
 
     Copyright (C) 2007 Matthew Woehlke <mw_triad@users.sourceforge.net>
     Copyright (C) 2007 Olaf Schmidt <ojschmidt@kde.org>
@@ -122,7 +122,7 @@
     the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
     Boston, MA 02110-1301, USA.
 
-# Hoedown
+## Hoedown
 
     Copyright (c) 2008, Natacha Porté
     Copyright (c) 2011, Vicent Martí
@@ -140,7 +140,7 @@
     ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# Batch icon set
+## Batch icon set
 
     You are free to use Batch (the "icon set") or any part thereof (the "icons")
     in any personal, open-source or commercial work without obligation of payment
@@ -156,7 +156,7 @@
     PUNITIVE OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OF THE ICONS,
     EVEN IF LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-# Material Design Icons
+## Material Design Icons
 
     Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/),
     with Reserved Font Name Material Design Icons.
@@ -167,7 +167,7 @@
     This license is copied below, and is also available with a FAQ at:
     http://scripts.sil.org/OFL
 
-# Quazip
+## Quazip
 
     Copyright (C) 2005-2021 Sergey A. Tachenov
 
@@ -191,7 +191,7 @@
 
     See COPYING file for the full LGPL text.
 
-# xz-minidec
+## xz-minidec
 
     XZ decompressor
 
@@ -201,7 +201,7 @@
     This file has been put into the public domain.
     You can do whatever you want with this file.
 
-# ColumnResizer
+## ColumnResizer
 
     Copyright (c) 2011-2016 Aurélien Gâteau and contributors.
 
@@ -237,7 +237,7 @@
     OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
     IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# launcher (`libraries/launcher`)
+## launcher (`libraries/launcher`)
 
      PolyMC - Minecraft Launcher
      Copyright (C) 2021-2022 PolyMC Contributors
@@ -288,7 +288,7 @@
          See the License for the specific language governing permissions and
          limitations under the License.
 
-# lionshead
+## lionshead
 
     Code has been taken from https://github.com/natefoo/lionshead and loosely
     translated to C++ laced with Qt.
@@ -315,7 +315,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 
-# tomlc99
+## tomlc99
 
     MIT License
 
@@ -340,7 +340,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 
-# O2 (Katabasis fork)
+## O2 (Katabasis fork)
 
     Copyright (c) 2012, Akos Polster
     All rights reserved.

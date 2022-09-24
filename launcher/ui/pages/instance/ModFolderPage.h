@@ -55,9 +55,17 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual bool shouldDisplay() const override;
     void runningStateChanged(bool running) override;
 
+   public slots:
+    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
+
    private slots:
+    void removeItem() override;
+
     void installMods();
     void updateMods();
+
+   protected:
+    std::shared_ptr<ModFolderModel> m_model;
 };
 
 class CoreModFolderPage : public ModFolderPage {

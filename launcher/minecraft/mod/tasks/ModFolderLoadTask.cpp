@@ -38,12 +38,23 @@
 
 #include "minecraft/mod/MetadataHandler.h"
 
-ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed, bool clean_orphan)
-    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
+#include <QThread>
+
+ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan)
+    : Task(nullptr, false)
+    , m_mods_dir(mods_dir)
+    , m_index_dir(index_dir)
+    , m_is_indexed(is_indexed)
+    , m_clean_orphan(clean_orphan)
+    , m_result(new Result())
+    , m_thread_to_spawn_into(thread())
 {}
 
-void ModFolderLoadTask::run()
+void ModFolderLoadTask::executeTask()
 {
+    if (thread() != m_thread_to_spawn_into)
+        connect(this, &Task::finished, this->thread(), &QThread::quit);
+
     if (m_is_indexed) {
         // Read metadata first
         getFromMetadata();
@@ -52,11 +63,13 @@ void ModFolderLoadTask::run()
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
-        Mod::Ptr mod(new Mod(entry));
+        Mod* mod(new Mod(entry));
 
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {
                 m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
+                // Delete the object we just created, since a valid one is already in the mods list.
+                delete mod;
             }
             else {
                 m_result->mods[mod->internal_id()] = mod;
@@ -86,7 +99,7 @@ void ModFolderLoadTask::run()
     // Remove orphan metadata to prevent issues
     // See https://github.com/PolyMC/PolyMC/issues/996
     if (m_clean_orphan) {
-        QMutableMapIterator<QString, Mod::Ptr> iter(m_result->mods);
+        QMutableMapIterator iter(m_result->mods);
         while (iter.hasNext()) {
             auto mod = iter.next().value();
             if (mod->status() == ModStatus::NotInstalled) {
@@ -96,7 +109,13 @@ void ModFolderLoadTask::run()
         }
     }
 
-    emit succeeded();
+    for (auto mod : m_result->mods)
+        mod->moveToThread(m_thread_to_spawn_into);
+
+    if (m_aborted)
+        emit finished();
+    else
+        emitSucceeded();
 }
 
 void ModFolderLoadTask::getFromMetadata()

@@ -38,12 +38,15 @@
 #include "ExternalResourcesPage.h"
 #include "ui_ExternalResourcesPage.h"
 
+#include "minecraft/mod/TexturePackFolderModel.h"
+#include "minecraft/mod/TexturePack.h"
+
 class TexturePackPage : public ExternalResourcesPage
 {
     Q_OBJECT
 public:
-    explicit TexturePackPage(MinecraftInstance *instance, QWidget *parent = 0)
-        : ExternalResourcesPage(instance, instance->texturePackList(), parent)
+    explicit TexturePackPage(MinecraftInstance *instance, std::shared_ptr<TexturePackFolderModel> model, QWidget *parent = 0)
+        : ExternalResourcesPage(instance, model, parent)
     {
         ui->actionViewConfigs->setVisible(false);
     }
@@ -57,5 +60,16 @@ public:
     virtual bool shouldDisplay() const override
     {
         return m_instance->traits().contains("texturepacks");
+    }
+
+   public slots:
+    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override
+    {
+        auto sourceCurrent = m_filterModel->mapToSource(current);
+        int row = sourceCurrent.row();
+        auto& rp = static_cast<TexturePack&>(m_model->at(row));
+        ui->frame->updateWithTexturePack(rp);
+
+        return true;
     }
 };

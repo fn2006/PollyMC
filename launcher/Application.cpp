@@ -60,6 +60,10 @@
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CustomTheme.h"
 
+#ifdef Q_OS_WIN
+#include "ui/WinDarkmode.h"
+#endif
+
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -112,6 +116,11 @@
 #include <LocalPeer.h>
 
 #include <sys.h>
+
+#ifdef Q_OS_LINUX
+#include <dlfcn.h>
+#include "gamemode_client.h"
+#endif
 
 
 #if defined Q_OS_WIN32
@@ -680,6 +689,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
+        m_settings->registerSetting("ModDownloadGeometry", "");
+
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
             m_settings->registerSetting("PastebinURL", "");
@@ -774,7 +785,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         auto platform = getIdealPlatform(BuildConfig.BUILD_PLATFORM);
         auto channelUrl = BuildConfig.UPDATER_BASE + platform + "/channels.json";
         qDebug() << "Initializing updater with platform: " << platform << " -- " << channelUrl;
-        m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
+        m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL));
         qDebug() << "<> Updater started.";
     }
 
@@ -921,6 +932,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         return;
     }
+
+    updateCapabilities();
     performMainStartupAction();
 }
 
@@ -1029,7 +1042,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, nullptr, serverToJoin, accountToUse);
+            launch(inst, true, false, nullptr, serverToJoin, accountToUse);
             return;
         }
     }
@@ -1133,6 +1146,7 @@ void Application::messageReceived(const QByteArray& message)
         launch(
             instance,
             true,
+            false,
             nullptr,
             serverObject,
             accountObject
@@ -1187,6 +1201,15 @@ void Application::setApplicationTheme(const QString& name, bool initial)
     {
         auto & theme = (*themeIter).second;
         theme->apply(initial);
+#ifdef Q_OS_WIN
+        if (m_mainWindow) {
+            if (QString::compare(theme->id(), "dark") == 0) {
+                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+            } else {
+                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+            }
+        }
+#endif
     }
     else
     {
@@ -1225,6 +1248,7 @@ bool Application::openJsonEditor(const QString &filename)
 bool Application::launch(
         InstancePtr instance,
         bool online,
+        bool demo,
         BaseProfilerFactory *profiler,
         MinecraftServerTargetPtr serverToJoin,
         MinecraftAccountPtr accountToUse
@@ -1248,6 +1272,7 @@ bool Application::launch(
         controller.reset(new LaunchController());
         controller->setInstance(instance);
         controller->setOnline(online);
+        controller->setDemo(demo);
         controller->setProfiler(profiler);
         controller->setServerToJoin(serverToJoin);
         controller->setAccountToUse(accountToUse);
@@ -1418,6 +1443,13 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow = new MainWindow();
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
+#ifdef Q_OS_WIN
+        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
+            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+        } else {
+            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+        }
+#endif
         if(minimized)
         {
             m_mainWindow->showMinimized();
@@ -1570,14 +1602,30 @@ shared_qobject_ptr<Meta::Index> Application::metadataIndex()
     return m_metadataIndex;
 }
 
-Application::Capabilities Application::currentCapabilities()
+void Application::updateCapabilities()
 {
-    Capabilities c;
+    m_capabilities = None;
     if (!getMSAClientID().isEmpty())
-        c |= SupportsMSA;
+        m_capabilities |= SupportsMSA;
     if (!getFlameAPIKey().isEmpty())
-        c |= SupportsFlame;
-    return c;
+        m_capabilities |= SupportsFlame;
+
+#ifdef Q_OS_LINUX
+    if (gamemode_query_status() >= 0)
+        m_capabilities |= SupportsGameMode;
+
+    {
+        void *dummy = dlopen("libMangoHud_dlsym.so", RTLD_LAZY);
+        // try normal variant as well
+        if (dummy == NULL)
+            dummy = dlopen("libMangoHud.so", RTLD_LAZY);
+
+        if (dummy != NULL) {
+            dlclose(dummy);
+            m_capabilities |= SupportsMangoHud;
+        }
+    }
+#endif
 }
 
 QString Application::getJarPath(QString jarFile)
