@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.polymc.utils;
+package org.pollymc.utils;
 
 import java.io.File;
 import java.lang.reflect.Field;

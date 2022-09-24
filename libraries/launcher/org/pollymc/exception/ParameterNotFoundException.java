@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.polymc.exception;
+package org.pollymc.exception;
 
 public final class ParameterNotFoundException extends IllegalArgumentException {
 

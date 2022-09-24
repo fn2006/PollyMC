@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.polymc;
+package org.pollymc;
 
 public interface Launcher {
 
