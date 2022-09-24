@@ -50,10 +50,10 @@
  *      limitations under the License.
  */
 
-package org.polymc;
+package org.pollymc;
 
-import org.polymc.exception.ParseException;
-import org.polymc.utils.Parameters;
+import org.pollymc.exception.ParseException;
+import org.pollymc.utils.Parameters;
 
 import java.io.BufferedReader;
 import java.io.IOException;

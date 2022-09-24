@@ -33,10 +33,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.polymc;
+package org.pollymc;
 
-import org.polymc.impl.OneSixLauncher;
-import org.polymc.utils.Parameters;
+import org.pollymc.impl.OneSixLauncher;
+import org.pollymc.utils.Parameters;
 
 import java.util.HashMap;
 import java.util.Map;

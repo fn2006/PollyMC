@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.polymc.utils;
+package org.pollymc.utils;
 
-import org.polymc.exception.ParameterNotFoundException;
+import org.pollymc.exception.ParameterNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

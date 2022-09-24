@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-package org.polymc.impl;
+package org.pollymc.impl;
 
-import org.polymc.Launcher;
-import org.polymc.applet.LegacyFrame;
-import org.polymc.utils.Parameters;
-import org.polymc.utils.Utils;
+import org.pollymc.Launcher;
+import org.pollymc.applet.LegacyFrame;
+import org.pollymc.utils.Parameters;
+import org.pollymc.utils.Utils;
 
 import java.applet.Applet;
 import java.io.File;
