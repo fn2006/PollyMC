@@ -51,7 +51,6 @@
 
 ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), m_is_indexed(is_indexed)
 {
-    FS::ensureFolderPathExists(m_dir.absolutePath());
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
 }
 
@@ -234,7 +233,7 @@ auto ModFolderModel::allMods() -> QList<Mod*>
 {
     QList<Mod*> mods;
 
-    for (auto& res : m_resources) {
+    for (auto& res : qAsConst(m_resources)) {
         mods.append(static_cast<Mod*>(res.get()));
     }
 
