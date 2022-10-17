@@ -1,6 +1,5 @@
 # !!! PolyMC's meta servers have been compromised !!!
-## For the time being use `https://meta.multimc.org/v1` as your metaserver and set your useragent to 'multimc'
-
+## For the time being use `https://meta.scrumplex.rocks/v1/` as your metaserver
 <p align="center">
 <img src="./program_info/pollymc-header-black.svg#gh-light-mode-only" alt="PollyMC logo" width="60%"/>
 <img src="./program_info/pollymc-header.svg#gh-dark-mode-only" alt="PollyMC logo" width="60%"/>
