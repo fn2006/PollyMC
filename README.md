@@ -1,5 +1,7 @@
-# !!! PolyMC's meta servers have been compromised !!!
-## For the time being use `https://meta.scrumplex.rocks/v1/` as your metaserver
+# One of PolyMC's developers has gone rouge and kicked out all of the other developers
+### For the time being use I would use `https://meta.prismlauncher.org/v1/` as your metaserver
+### If you trust him then you can continue using the default metaserver but I take no responsibility for anything that happens while using it
+
 <p align="center">
 <img src="./program_info/pollymc-header-black.svg#gh-light-mode-only" alt="PollyMC logo" width="60%"/>
 <img src="./program_info/pollymc-header.svg#gh-dark-mode-only" alt="PollyMC logo" width="60%"/>
