@@ -5,6 +5,7 @@
 , ninja
 , jdk8
 , jdk
+, ghc_filesystem
 , zlib
 , file
 , wrapQtAppsHook
@@ -21,6 +22,7 @@
 , self
 , version
 , libnbtplusplus
+, tomlplusplus
 , enableLTO ? false
 }:
 
@@ -36,7 +38,7 @@ let
     libGL
   ];
 
-  # This variable will be passed to Minecraft by PolyMC
+  # This variable will be passed to Minecraft by Prism Launcher
   gameLibraryPath = libpath + ":/run/opengl-driver/lib";
 
   javaPaths = lib.makeSearchPath "bin/java" ([ jdk jdk8 ] ++ extraJDKs);
@@ -48,7 +50,7 @@ stdenv.mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake extra-cmake-modules ninja jdk file wrapQtAppsHook ];
+  nativeBuildInputs = [ cmake extra-cmake-modules ninja jdk ghc_filesystem file wrapQtAppsHook ];
   buildInputs = [ qtbase quazip zlib ];
 
   dontWrapQtApps = true;
@@ -59,6 +61,11 @@ stdenv.mkDerivation rec {
     mkdir source/libraries/libnbtplusplus
     cp -a ${libnbtplusplus}/* source/libraries/libnbtplusplus
     chmod a+r+w source/libraries/libnbtplusplus/*
+    # Copy tomlplusplus
+    rm -rf source/libraries/tomlplusplus
+    mkdir source/libraries/tomlplusplus
+    cp -a ${tomlplusplus}/* source/libraries/tomlplusplus
+    chmod a+r+w source/libraries/tomlplusplus/*
   '';
 
   cmakeFlags = [
@@ -73,7 +80,7 @@ stdenv.mkDerivation rec {
     wrapQtApp $out/bin/pollymc \
       --run '[ -f /etc/NIXOS ] && export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"' \
       --prefix LD_LIBRARY_PATH : ${gameLibraryPath} \
-      --prefix POLYMC_JAVA_PATHS : ${javaPaths} \
+      --prefix PRISMLAUNCHER_JAVA_PATHS : ${javaPaths} \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
   '';
 

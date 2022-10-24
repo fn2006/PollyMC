@@ -1,17 +1,14 @@
-# One of PolyMC's developers has gone rouge and kicked out all of the other developers
-### For the time being use I would use `https://meta.prismlauncher.org/v1/` as your metaserver
-### If you trust him then you can continue using the default metaserver but I take no responsibility for anything that happens while using it
-
 <p align="center">
 <img src="./program_info/pollymc-header-black.svg#gh-light-mode-only" alt="PollyMC logo" width="60%"/>
 <img src="./program_info/pollymc-header.svg#gh-dark-mode-only" alt="PollyMC logo" width="60%"/>
 </p>
 
-PollyMC is a **fork** of PolyMC and is not endorsed by or affiliated with the PolyMC project.
-If you have any problems open an issue here, do not bug the PolyMC maintainers.
+PollyMC is a **fork** of Prism Launcher that adds support for Ely.by accounts and allows you to play offline mode without an account
+PollyMC is not endorsed by or affiliated with the Prism Launcher project.
+If you have any problems open an issue here, do not bug the Prism Launcher maintainers.
 
 Binaries can be found in releases.
 
 Workaround for downloading from CurseForge and FTB not working [here](https://github.com/fn2006/PollyMC/wiki/CurseForge-Workaround).
 
-To build this yourself, follow the instructions on the PolyMC website but clone this repo instead.
+To build this yourself, follow the instructions on the Prism Launcher website but clone this repo instead.

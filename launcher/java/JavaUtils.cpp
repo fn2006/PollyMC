@@ -174,7 +174,7 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 
 QStringList addJavasFromEnv(QList<QString> javas)
 {
-    auto env = qEnvironmentVariable("POLYMC_JAVA_PATHS");
+    auto env = qEnvironmentVariable("PRISMLAUNCHER_JAVA_PATHS");  // FIXME: use launcher name from buildconfig
 #if defined(Q_OS_WIN32)
     QList<QString> javaPaths = env.replace("\\", "/").split(QLatin1String(";"));
     
@@ -441,7 +441,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/usr/lib/jvm");
     scanJavaDir("/usr/lib64/jvm");
     scanJavaDir("/usr/lib32/jvm");
-    // javas stored in PolyMC's folder
+    // javas stored in Prism Launcher's folder
     scanJavaDir("java");
     // manually installed JDKs in /opt
     scanJavaDir("/opt/jdk");

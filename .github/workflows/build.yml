@@ -39,11 +39,20 @@ jobs:
             qt_ver: 6
 
           - os: macos-12
+            name: macOS
             macosx_deployment_target: 10.15
             qt_ver: 6
             qt_host: mac
             qt_version: '6.3.0'
             qt_modules: 'qt5compat qtimageformats'
+
+          - os: macos-12
+            name: macOS-Legacy
+            macosx_deployment_target: 10.13
+            qt_ver: 5
+            qt_host: mac
+            qt_version: '5.15.2'
+            qt_modules: ''
 
     runs-on: ${{ matrix.os }}
 
@@ -63,6 +72,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'true'
+
+      - name: Initialize CodeQL
+        if: runner.os == 'Linux' && matrix.qt_ver == 6
+        uses: github/codeql-action/init@v2
+        with:
+          config-file: ./.github/codeql/codeql-config.yml
+          queries: security-and-quality
+          languages: cpp, java
 
       - name: 'Setup MSYS2'
         if: runner.os == 'Windows'
@@ -140,7 +157,7 @@ jobs:
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
  
       - name: Install Qt (macOS and AppImage)
-        if: matrix.qt_ver == 6 && runner.os != 'Windows'
+        if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS'
         uses: jurplel/install-qt-action@v3
         with:
            version: ${{ matrix.qt_version }}
@@ -164,9 +181,14 @@ jobs:
       ##
 
       - name: Configure CMake (macOS)
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.qt_ver == 6
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DLauncher_BUILD_PLATFORM=macOS -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G Ninja
+
+      - name: Configure CMake (macOS-Legacy)
+        if: runner.os == 'macOS' && matrix.qt_ver == 5
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -G Ninja
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
@@ -210,6 +232,14 @@ jobs:
           ctest --test-dir build --output-on-failure
 
       ##
+      # CODE SCAN
+      ##
+
+      - name: Perform CodeQL Analysis
+        if: runner.os == 'Linux' && matrix.qt_ver == 6
+        uses: github/codeql-action/analyze@v2
+
+      ##
       # PACKAGE BUILDS
       ##
 
@@ -224,7 +254,7 @@ jobs:
           tar -czf ../PollyMC.tar.gz *
 
       - name: Make Sparkle signature (macOS)
-        if: runner.os == 'macOS'
+        if: matrix.name == 'macOS'
         run: |
           if [ '${{ secrets.SPARKLE_ED25519_KEY }}' != '' ]; then
             brew install openssl@3
@@ -323,7 +353,7 @@ jobs:
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
         with:
-          name: PollyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PollyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PollyMC.tar.gz
 
       - name: Upload binary zip (Windows)

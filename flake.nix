@@ -4,10 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
-    libnbtplusplus = { url = "github:PolyMC/libnbtplusplus"; flake = false; };
+    libnbtplusplus = { url = "github:PrismLauncher/libnbtplusplus"; flake = false; };
+    tomlplusplus = { url = "github:marzer/tomlplusplus"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, libnbtplusplus, ... }:
+  outputs = { self, nixpkgs, libnbtplusplus, tomlplusplus, ... }:
     let
       # User-friendly version number.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -22,14 +23,14 @@
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
 
       packagesFn = pkgs: rec {
-        polymc = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
-        polymc-qt6 = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
+        prismlauncher = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
+        prismlauncher-qt6 = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
       };
     in
     {
       packages = forAllSystems (system:
         let packages = packagesFn pkgs.${system}; in
-        packages // { default = packages.polymc; }
+        packages // { default = packages.prismlauncher; }
       );
 
       overlay = final: packagesFn;

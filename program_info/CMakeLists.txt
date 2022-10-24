@@ -9,13 +9,15 @@ if(UNIX)
 endif()
 
 set(Launcher_CommonName "PollyMC")
+set(Launcher_DisplayName "PollyMC")
+
+set(Launcher_Name "${Launcher_CommonName}" PARENT_SCOPE)
+set(Launcher_DisplayName "${Launcher_DisplayName}" PARENT_SCOPE)
 
 set(Launcher_Copyright "© 2022 PollyMC Contributors\\n© 2021-2022 PolyMC Contributors\\n© 2012-2021 MultiMC Contributors")
 set(Launcher_Copyright "${Launcher_Copyright}" PARENT_SCOPE)
 set(Launcher_Domain "" PARENT_SCOPE)
-set(Launcher_Name "${Launcher_CommonName}" PARENT_SCOPE)
-set(Launcher_DisplayName "${Launcher_CommonName}" PARENT_SCOPE)
-set(Launcher_UserAgent "PolyMC/${Launcher_RELEASE_VERSION_NAME}" PARENT_SCOPE)
+set(Launcher_UserAgent "PrismLauncher/${Launcher_RELEASE_VERSION_NAME}" PARENT_SCOPE)
 set(Launcher_ConfigFile "pollymc.cfg" PARENT_SCOPE)
 set(Launcher_Git "https://github.com/fn2006/PollyMC" PARENT_SCOPE)
 set(Launcher_DesktopFileName "org.fn2006.PollyMC.desktop" PARENT_SCOPE)

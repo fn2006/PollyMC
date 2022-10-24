@@ -2,13 +2,13 @@
 
 This folder has third-party or otherwise external libraries needed for other parts to work.
 
-## classparser
+## filesystem
 
-A simplistic parser for Java class files.
+Gulrak's implementation of C++17 std::filesystem for C++11 /C++14/C++17/C++20 on Windows, macOS, Linux and FreeBSD.
 
-This library has served as a base for some (much more full-featured and advanced) work under NDA for AVG. It, however, should NOT be confused with that work.
+See [github repo](https://github.com/gulrak/filesystem).
 
-Copyright belongs to Petr Mrázek, unless explicitly stated otherwise in the source files. Available under the Apache 2.0 license.
+MIT licensed.
 
 ## gamemode
 
@@ -44,17 +44,17 @@ Java launcher part for Minecraft.
 
 It:
 
-* Starts a process
-* Waits for a launch script on stdin
-* Consumes the launch script you feed it
-* Proceeds with launch when it gets the `launcher` command
+- Starts a process
+- Waits for a launch script on stdin
+- Consumes the launch script you feed it
+- Proceeds with launch when it gets the `launcher` command
 
 This means the process is essentially idle until the final command is sent. You can, for example, attach a profiler before you send it.
 
 A `legacy` and `onesix` launchers are available.
 
-* `legacy` is intended for use with Minecraft versions < 1.6 and is deprecated.
-* `onesix` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
+- `legacy` is intended for use with Minecraft versions < 1.6 and is deprecated.
+- `onesix` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
 
 Example (some parts have been censored):
 
@@ -173,20 +173,14 @@ Available either under LGPL version 2.1 or later.
 
 ## systeminfo
 
-A PolyMC-specific library for probing system information.
+A Prism Launcher-specific library for probing system information.
 
 Apache 2.0
 
-## tomlc99
+## tomlplusplus
 
 A TOML language parser. Used by Forge 1.14+ to store mod metadata.
 
-See [github repo](https://github.com/cktan/tomlc99).
+See [github repo](https://github.com/marzer/tomlplusplus).
 
 Licenced under the MIT licence.
-
-## xz-embedded
-
-Tiny implementation of LZMA2 de/compression. This format was only used by Forge to save bandwidth.
-
-Public domain.
