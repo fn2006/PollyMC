@@ -301,11 +301,13 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
+		/*
         QDir polymcData(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "PolyMC"));
         if (polymcData.exists()) {
             dataPath = polymcData.absolutePath();
             adjustedBy = "PolyMC data path";
         }
+        */
 
 #ifdef Q_OS_LINUX
         // TODO: this should be removed in a future version

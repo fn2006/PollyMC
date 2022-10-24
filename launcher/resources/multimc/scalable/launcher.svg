@@ -25,8 +25,8 @@
      inkscape:document-units="px"
      showgrid="false"
      inkscape:zoom="12.697086"
-     inkscape:cx="24.966358"
-     inkscape:cy="30.558192"
+     inkscape:cx="35.638098"
+     inkscape:cy="31.345775"
      inkscape:window-width="1920"
      inkscape:window-height="994"
      inkscape:window-x="0"
@@ -72,13 +72,10 @@
        clip-path="none"
        transform="matrix(1.25,0,0,1.25,-8,-10.5)">
       <path
-         id="path352"
+         id="path300"
          style="fill:#8acb01"
-         inkscape:label="head"
-         d="M 8,16 H 32.03161 V 52 H 8 Z m 22.020351,0 H 56 V 47.200001 H 30.020351 Z m 1.153153,0 h 12 v 33.599998 h -12 z">
-        <title
-           id="title908">head</title>
-      </path>
+         d="m 8,16 c 0,12 0,24 0,36 8.010417,0 16.020833,0 24.03125,0 0,-0.8 0,-1.6 0,-2.4 3.714062,0 7.428125,0 11.142187,0 0,-0.8 0,-1.6 0,-2.4 4.275521,0 8.551042,0 12.826563,0 C 56,36.8 56,26.4 56,16 40,16 24,16 8,16 Z"
+         inkscape:label="head" />
       <path
          id="rect3493"
          style="fill:#b0af8d;stroke-width:1.39562"
@@ -90,9 +87,9 @@
          d="M 19.960001,28 H 32.333299 V 40 H 19.960001 Z"
          style="stroke-width:1.00871" />
       <path
-         id="path928"
+         id="path352"
          style="display:inline;fill:#3b3b3b;fill-opacity:1;stroke-width:1.00922"
-         d="M 32,27.999999 H 56 V 47.555555 H 32 Z m 0,0 h 12 v 22 H 32 Z"
+         d="m 32,28 c 0,7.333333 0,14.666667 0,22 4,0 8,0 12,0 0,-0.814583 0,-1.629167 0,-2.44375 4,0 8,0 12,0 C 56,41.0375 56,34.51875 56,28 48,28 40,28 32,28 Z"
          inkscape:label="beak" />
     </g>
   </g>
