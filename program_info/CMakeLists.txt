@@ -21,6 +21,7 @@ set(Launcher_UserAgent "PrismLauncher/${Launcher_RELEASE_VERSION_NAME}" PARENT_S
 set(Launcher_ConfigFile "pollymc.cfg" PARENT_SCOPE)
 set(Launcher_Git "https://github.com/fn2006/PollyMC" PARENT_SCOPE)
 set(Launcher_DesktopFileName "org.fn2006.PollyMC.desktop" PARENT_SCOPE)
+set(Launcher_SVGFileName "org.fn2006.PollyMC.svg" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/org.fn2006.PollyMC.desktop" PARENT_SCOPE)
 set(Launcher_MetaInfo "program_info/org.fn2006.PollyMC.metainfo.xml" PARENT_SCOPE)

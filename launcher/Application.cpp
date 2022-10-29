@@ -1168,8 +1168,7 @@ void Application::setIconTheme(const QString& name)
 QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
-        // why is this hardcoded lol
-        return QIcon(":/org.fn2006.PollyMC.svg");
+        return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
 }
