@@ -6,29 +6,29 @@
 
 #### Directly installing
 
-The `prismlauncher` flake provides a package which you can install along with
+The `pollymc` flake provides a package which you can install along with
 the rest of your packages
 
 ```nix
 # In your flake.nix:
 {
   inputs = {
-    prismlauncher.url = "github:PrismLauncher/PrismLauncher";
+    pollymc.url = "github:fn2006/PollyMC";
   };
 }
 ```
 
 ```nix
 # And in your system configuration:
-environment.systemPackages = [ prismlauncher.packages.${pkgs.system}.prismlauncher ];
+environment.systemPackages = [ pollymc.packages.${pkgs.system}.pollymc ];
 
 # Or in your home-manager configuration:
-home.packages = [ prismlauncher.packages.${pkgs.system}.prismlauncher ];
+home.packages = [ pollymc.packages.${pkgs.system}.pollymc ];
 ```
 
 #### Using the overlay
 
-Alternatively, you can overlay the prismlauncher version in nixpkgs which will
+Alternatively, you can overlay the pollymc version in nixpkgs which will
 allow you to install using `pkgs` as you normally would while also using the
 latest version
 
@@ -36,19 +36,19 @@ latest version
 # In your flake.nix:
 {
   inputs = {
-    prismlauncher.url = "github:PrismLauncher/PrismLauncher";
+    pollymc.url = "github:fn2006/PollyMC";
   };
 }
 ```
 
 ```nix
 # And in your system configuration:
-nixpkgs.overlays = [ inputs.prismlauncher.overlay ];
-environment.systemPackages = [ pkgs.prismlauncher ];
+nixpkgs.overlays = [ inputs.pollymc.overlay ];
+environment.systemPackages = [ pkgs.pollymc ];
 
 # Or in your home-manager configuration:
-config.nixpkgs.overlays = [ inputs.prismlauncher.overlay ];
-home.packages = [ pkgs.prismlauncher ];
+config.nixpkgs.overlays = [ inputs.pollymc.overlay ];
+home.packages = [ pkgs.pollymc ];
 ```
 
 ### Without flakes-enabled nix
@@ -56,9 +56,9 @@ home.packages = [ pkgs.prismlauncher ];
 #### Using channels
 
 ```sh
-nix-channel --add https://github.com/PrismLauncher/PrismLauncher/archive/master.tar.gz prismlauncher
-nix-channel --update prismlauncher
-nix-env -iA prismlauncher
+nix-channel --add https://github.com/fn2006/PollyMC/archive/master.tar.gz pollymc
+nix-channel --update pollymc
+nix-env -iA pollymc
 ```
 
 #### Using the overlay
@@ -67,10 +67,10 @@ nix-env -iA prismlauncher
 # In your configuration.nix:
 {
   nixpkgs.overlays = [
-    (import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).overlay
+    (import (builtins.fetchTarball "https://github.com/fn2006/PollyMC/archive/develop.tar.gz")).overlay
   ];
 
-  environment.systemPackages = with pkgs; [ prismlauncher ];
+  environment.systemPackages = with pkgs; [ pollymc ];
 }
 ```
 
@@ -79,5 +79,5 @@ nix-env -iA prismlauncher
 If you're on a flakes-enabled nix you can run the launcher in one-line
 
 ```sh
-nix run github:PrismLauncher/PrismLauncher
+nix run github:fn2006/PollyMC
 ```
