@@ -62,6 +62,7 @@
 
 #ifdef Q_OS_WIN
 #include "ui/WinDarkmode.h"
+#include <versionhelpers.h>
 #endif
 
 #include "ui/setupwizard/SetupWizard.h"
@@ -1127,15 +1128,6 @@ std::vector<ITheme *> Application::getValidApplicationThemes()
     return ret;
 }
 
-bool Application::isFlatpak()
-{
-    #ifdef Q_OS_LINUX
-    return QFile::exists("/.flatpak-info");
-    #else
-    return false;
-    #endif
-}
-
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
@@ -1145,7 +1137,7 @@ void Application::setApplicationTheme(const QString& name, bool initial)
         auto & theme = (*themeIter).second;
         theme->apply(initial);
 #ifdef Q_OS_WIN
-        if (m_mainWindow) {
+        if (m_mainWindow && IsWindows10OrGreater()) {
             if (QString::compare(theme->id(), "dark") == 0) {
                     WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
             } else {
@@ -1386,10 +1378,13 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
 #ifdef Q_OS_WIN
-        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-        } else {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+        if (IsWindows10OrGreater())
+        {
+            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+            } else {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+            }
         }
 #endif
         if(minimized)
@@ -1574,7 +1569,7 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/jars"),
+        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars")

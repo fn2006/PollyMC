@@ -49,6 +49,7 @@
 #include <FileSystem.h>
 #include "Application.h"
 #include "BuildConfig.h"
+#include "DesktopServices.h"
 #include "ui/themes/ITheme.h"
 
 #include <QApplication>
@@ -143,11 +144,11 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
                 ui->instDirTextBox->setText(cooked_dir);
             }
         }
-        else if(APPLICATION->isFlatpak() && raw_dir.startsWith("/run/user"))
+        else if(DesktopServices::isFlatpak() && raw_dir.startsWith("/run/user"))
         {
             QMessageBox warning;
             warning.setText(tr("You're trying to specify an instance folder "
-                            "which was granted temporaily via Flatpak.\n"
+                            "which was granted temporarily via Flatpak.\n"
                             "This is known to cause problems. "
                             "After a restart the launcher might break, "
                             "because it will no longer have access to that directory.\n\n"
