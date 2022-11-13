@@ -6,9 +6,9 @@ body:
   attributes:
     value: |
       Before submitting a bug report, please make sure you have read this *entire* form, and that:
-      * You have read the [PolyMC wiki](https://polymc.org/wiki/) and it has not answered your question.
+      * You have read the [Prism Launcher wiki](https://prismlauncher.org/wiki/) and it has not answered your question.
       * Your bug is not caused by Minecraft or any mods you have installed.
-      * Your issue has not been reported before, [make sure to use the search function!](https://github.com/PolyMC/PolyMC/issues)
+      * Your issue has not been reported before, [make sure to use the search function!](https://github.com/PrismLauncher/PrismLauncher/issues)
 
       **Do not forget to give your issue a descriptive title.** "Bug in the instance screen" makes it hard to distinguish issues at a glance.
 - type: dropdown
@@ -25,7 +25,7 @@ body:
   attributes:
     label: Version of PollyMC
     description: The version of PollyMC used in the bug report.
-    placeholder: PollyMC 1.4.1
+    placeholder: PollyMC 5.1
   validations:
     required: true
 - type: textarea

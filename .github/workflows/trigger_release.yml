@@ -47,10 +47,12 @@ jobs:
 
           for d in PollyMC-Windows-*; do
             cd "${d}" || continue
+            MSVC="$(echo -n ${d} | grep -o MSVC || true)"
             LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
             NAME="PollyMC-Windows"
+            test -z "${MSVC}" && NAME="${NAME}-MinGW" || NAME="${NAME}-MSVC"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
             test -z "${INST}" || mv PollyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
@@ -72,14 +74,20 @@ jobs:
             PollyMC-Linux-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-            PollyMC-Windows-Legacy-${{ env.VERSION }}.zip
             PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PollyMC-Windows-Legacy-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-Legacy-Setup-${{ env.VERSION }}.exe
-            PollyMC-Windows-${{ env.VERSION }}.zip
-            PollyMC-Windows-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MinGW-Legacy-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-Legacy-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-Legacy-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MinGW-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-Legacy-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Legacy-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Setup-${{ env.VERSION }}.exe
             PollyMC-macOS-${{ env.VERSION }}.tar.gz
             PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
             PollyMC-${{ env.VERSION }}.tar.gz

@@ -262,6 +262,8 @@ public:
     TranslatedAction actionNoAccountsAdded;
     TranslatedAction actionNoDefaultAccount;
 
+    TranslatedAction actionLockToolbars;
+
     QVector<TranslatedToolButton *> all_toolbuttons;
 
     QWidget *centralWidget = nullptr;
@@ -420,6 +422,12 @@ public:
         actionManageAccounts->setCheckable(false);
         actionManageAccounts->setIcon(APPLICATION->getThemedIcon("accounts"));
         all_actions.append(&actionManageAccounts);
+
+        actionLockToolbars = TranslatedAction(MainWindow);
+        actionLockToolbars->setObjectName(QStringLiteral("actionLockToolbars"));
+        actionLockToolbars.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Lock Toolbars"));
+        actionLockToolbars->setCheckable(true);
+        all_actions.append(&actionLockToolbars);
     }
 
     void createMainToolbar(QMainWindow *MainWindow)
@@ -427,7 +435,6 @@ public:
         mainToolBar = TranslatedToolbar(MainWindow);
         mainToolBar->setVisible(menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        mainToolBar->setMovable(true);
         mainToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         mainToolBar->setFloatable(false);
@@ -524,6 +531,8 @@ public:
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
+        viewMenu->addAction(actionLockToolbars);
+
         menuBar->addMenu(foldersMenu);
 
         profileMenu = menuBar->addMenu(tr("&Accounts"));
@@ -601,7 +610,6 @@ public:
     {
         newsToolBar = TranslatedToolbar(MainWindow);
         newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
-        newsToolBar->setMovable(true);
         newsToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         newsToolBar->setIconSize(QSize(16, 16));
         newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -642,6 +650,7 @@ public:
         actionRenameInstance->setObjectName(QStringLiteral("actionRenameInstance"));
         actionRenameInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Rename"));
         actionRenameInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Rename the selected instance."));
+        actionRenameInstance->setIcon(APPLICATION->getThemedIcon("rename"));
         all_actions.append(&actionRenameInstance);
 
         // the rename label is inside the rename tool button
@@ -654,6 +663,7 @@ public:
         actionLaunchInstance->setObjectName(QStringLiteral("actionLaunchInstance"));
         actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Launch"));
         actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance."));
+        actionLaunchInstance->setIcon(APPLICATION->getThemedIcon("launch"));
         all_actions.append(&actionLaunchInstance);
 
         actionLaunchInstanceOffline = TranslatedAction(MainWindow);
@@ -674,6 +684,7 @@ public:
         actionKillInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Kill"));
         actionKillInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Kill the running instance"));
         actionKillInstance->setShortcut(QKeySequence(tr("Ctrl+K")));
+        actionKillInstance->setIcon(APPLICATION->getThemedIcon("status-bad"));
         all_actions.append(&actionKillInstance);
 
         actionEditInstance = TranslatedAction(MainWindow);
@@ -681,6 +692,7 @@ public:
         actionEditInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Edit..."));
         actionEditInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the instance settings, mods and versions."));
         actionEditInstance->setShortcut(QKeySequence(tr("Ctrl+I")));
+        actionEditInstance->setIcon(APPLICATION->getThemedIcon("settings-configure"));
         all_actions.append(&actionEditInstance);
 
         actionChangeInstGroup = TranslatedAction(MainWindow);
@@ -688,12 +700,14 @@ public:
         actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change Group..."));
         actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's group."));
         actionChangeInstGroup->setShortcut(QKeySequence(tr("Ctrl+G")));
+        actionChangeInstGroup->setIcon(APPLICATION->getThemedIcon("tag"));
         all_actions.append(&actionChangeInstGroup);
 
         actionViewSelectedInstFolder = TranslatedAction(MainWindow);
         actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
         actionViewSelectedInstFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Folder"));
         actionViewSelectedInstFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's root folder in a file browser."));
+        actionViewSelectedInstFolder->setIcon(APPLICATION->getThemedIcon("viewfolder"));
         all_actions.append(&actionViewSelectedInstFolder);
 
         actionExportInstance = TranslatedAction(MainWindow);
@@ -701,6 +715,7 @@ public:
         actionExportInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "E&xport..."));
         actionExportInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Export the selected instance as a zip file."));
         actionExportInstance->setShortcut(QKeySequence(tr("Ctrl+E")));
+        actionExportInstance->setIcon(APPLICATION->getThemedIcon("export"));
         all_actions.append(&actionExportInstance);
 
         actionDeleteInstance = TranslatedAction(MainWindow);
@@ -709,14 +724,15 @@ public:
         actionDeleteInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Delete the selected instance."));
         actionDeleteInstance->setShortcuts({QKeySequence(tr("Backspace")), QKeySequence::Delete});
         actionDeleteInstance->setAutoRepeat(false);
+        actionDeleteInstance->setIcon(APPLICATION->getThemedIcon("delete"));
         all_actions.append(&actionDeleteInstance);
 
         actionCopyInstance = TranslatedAction(MainWindow);
         actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
-        actionCopyInstance->setIcon(APPLICATION->getThemedIcon("copy"));
         actionCopyInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Cop&y..."));
         actionCopyInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Copy the selected instance."));
         actionCopyInstance->setShortcut(QKeySequence(tr("Ctrl+D")));
+        actionCopyInstance->setIcon(APPLICATION->getThemedIcon("copy"));
         all_actions.append(&actionCopyInstance);
 
         setInstanceActionsEnabled(false);
@@ -728,12 +744,13 @@ public:
         instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
         // disabled until we have an instance selected
         instanceToolBar->setEnabled(false);
-        instanceToolBar->setMovable(true);
         // Qt doesn't like vertical moving toolbars, so we have to force them...
         // See https://github.com/PolyMC/PolyMC/issues/493
         connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
         instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
-        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        instanceToolBar->setIconSize(QSize(16, 16));
+
         instanceToolBar->setFloatable(false);
         instanceToolBar->setWindowTitle(QT_TRANSLATE_NOOP("MainWindow", "Instance Toolbar"));
 
@@ -753,8 +770,18 @@ public:
         instanceToolBar->addAction(actionViewSelectedInstFolder);
 
         instanceToolBar->addAction(actionExportInstance);
-        instanceToolBar->addAction(actionDeleteInstance);
         instanceToolBar->addAction(actionCopyInstance);
+        instanceToolBar->addAction(actionDeleteInstance);
+
+        QLayout * lay = instanceToolBar->layout();
+        for(int i = 0; i < lay->count(); i++)
+        {
+            QLayoutItem * item = lay->itemAt(i);
+            if (item->widget()->metaObject()->className() == QString("QToolButton"))
+            {
+                item->setAlignment(Qt::AlignLeft);
+            }
+        }
 
         all_toolbars.append(&instanceToolBar);
         MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
@@ -897,6 +924,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
         setCatBackground(cat_enable);
+    }
+
+    // Lock toolbars
+    {
+        bool toolbarsLocked = APPLICATION->settings()->get("ToolbarsLocked").toBool();
+        ui->actionLockToolbars->setChecked(toolbarsLocked);
+        connect(ui->actionLockToolbars, &QAction::toggled, this, &MainWindow::lockToolbars);
+        lockToolbars(toolbarsLocked);
     }
     // start instance when double-clicked
     connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
@@ -1053,8 +1088,19 @@ QMenu * MainWindow::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction( ui->mainToolBar->toggleViewAction() );
+
+    filteredMenu->addAction(ui->actionLockToolbars);
+
     return filteredMenu;
 }
+void MainWindow::lockToolbars(bool state)
+{
+    ui->mainToolBar->setMovable(!state);
+    ui->instanceToolBar->setMovable(!state);
+    ui->newsToolBar->setMovable(!state);
+    APPLICATION->settings()->set("ToolbarsLocked", state);
+}
+
 
 void MainWindow::konamiTriggered()
 {
@@ -1540,15 +1586,14 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime now = QDateTime::currentDateTime();
         QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QString cat;
-        if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat = "catmas";
-        }
-        else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat = "cattiversary";
-        }
-        else {
-            cat = "kitteh";
+        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
+        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
+        if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
+            cat += "-xmas";
+        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
+            cat += "-spooky";
+        } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
+            cat += "-bday";
         }
         view->setStyleSheet(QString(R"(
 InstanceView
@@ -1556,10 +1601,11 @@ InstanceView
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
-    background-position: top right;
+    background-position: bottom left;
     background-repeat: none;
     background-color:palette(base);
-})").arg(cat));
+})")
+                                .arg(cat));
     }
     else
     {
@@ -1605,7 +1651,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     if (!copyInstDlg.exec())
         return;
 
-    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.shouldCopySaves(), copyInstDlg.shouldKeepPlaytime());
+    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.getChosenOptions());
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
@@ -1880,6 +1926,7 @@ void MainWindow::on_actionReportBug_triggered()
 void MainWindow::on_actionClearMetadata_triggered()
 {
     APPLICATION->metacache()->evictAll();
+    APPLICATION->metacache()->SaveNow();
 }
 
 void MainWindow::on_actionOpenWiki_triggered()

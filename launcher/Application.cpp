@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,12 +55,6 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
-#include "ui/themes/ITheme.h"
-#include "ui/themes/SystemTheme.h"
-#include "ui/themes/DarkTheme.h"
-#include "ui/themes/BrightTheme.h"
-#include "ui/themes/CustomTheme.h"
-
 #ifdef Q_OS_WIN
 #include "ui/WinDarkmode.h"
 #include <versionhelpers.h>
@@ -73,6 +68,8 @@
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include "ui/pagedialog/PageDialog.h"
+
+#include "ui/themes/ThemeManager.h"
 
 #include "ApplicationMessage.h"
 
@@ -246,7 +243,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"s", "server"}, "Join the specified server on launch (only valid in combination with --launch)", "address"},
         {{"a", "profile"}, "Use the account specified by its profile name (only valid in combination with --launch)", "profile"},
         {"alive", "Write a small '" + liveCheckFile + "' file after the launcher starts"},
-        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"}
+        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
+        {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
     parser.addHelpOption();
     parser.addVersionOption();
@@ -258,6 +256,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
     m_zipToImport = parser.value("import");
+    m_instanceIdToShowWindowOf = parser.value("show");
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
@@ -501,6 +500,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
         m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
@@ -565,7 +565,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Memory
         m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
-        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 4096);
+        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, suitableMaxMem());
         m_settings->registerSetting("PermGen", 128);
 
         // Java Settings
@@ -612,6 +612,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // The cat
         m_settings->registerSetting("TheCat", false);
+
+        m_settings->registerSetting("ToolbarsLocked", false);
 
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("SelectedInstance", QString());
@@ -749,29 +751,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Instance icons intialized.";
     }
 
-    // Icon themes
-    {
-        // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
-        // set icon theme search path!
-        auto searchPaths = QIcon::themeSearchPaths();
-        searchPaths.append("iconthemes");
-        QIcon::setThemeSearchPaths(searchPaths);
-        qDebug() << "<> Icon themes initialized.";
-    }
-
-    // Initialize widget themes
-    {
-        auto insertTheme = [this](ITheme * theme)
-        {
-            m_themes.insert(std::make_pair(theme->id(), std::unique_ptr<ITheme>(theme)));
-        };
-        auto darkTheme = new DarkTheme();
-        insertTheme(new SystemTheme());
-        insertTheme(darkTheme);
-        insertTheme(new BrightTheme());
-        insertTheme(new CustomTheme(darkTheme, "custom"));
-        qDebug() << "<> Widget themes initialized.";
-    }
+    // Themes
+    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
 
     // initialize and load all instances
     {
@@ -949,6 +930,12 @@ bool Application::event(QEvent* event) {
         m_prevAppState = ev->applicationState();
     }
 #endif
+
+    if (event->type() == QEvent::FileOpen) {
+        auto ev = static_cast<QFileOpenEvent*>(event);
+        m_mainWindow->droppedURLs({ ev->url() });
+    }
+
     return QApplication::event(event);
 }
 
@@ -987,6 +974,16 @@ void Application::performMainStartupAction()
             }
 
             launch(inst, true, false, nullptr, serverToJoin, accountToUse);
+            return;
+        }
+    }
+    if(!m_instanceIdToShowWindowOf.isEmpty())
+    {
+        auto inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
+        if(inst)
+        {
+            qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
+            showInstanceWindow(inst);
             return;
         }
     }
@@ -1116,45 +1113,19 @@ std::shared_ptr<JavaInstallList> Application::javalist()
     return m_javalist;
 }
 
-std::vector<ITheme *> Application::getValidApplicationThemes()
+QList<ITheme*> Application::getValidApplicationThemes()
 {
-    std::vector<ITheme *> ret;
-    auto iter = m_themes.cbegin();
-    while (iter != m_themes.cend())
-    {
-        ret.push_back((*iter).second.get());
-        iter++;
-    }
-    return ret;
+    return m_themeManager->getValidApplicationThemes();
 }
 
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
-    auto systemPalette = qApp->palette();
-    auto themeIter = m_themes.find(name);
-    if(themeIter != m_themes.end())
-    {
-        auto & theme = (*themeIter).second;
-        theme->apply(initial);
-#ifdef Q_OS_WIN
-        if (m_mainWindow && IsWindows10OrGreater()) {
-            if (QString::compare(theme->id(), "dark") == 0) {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
-    }
-    else
-    {
-        qWarning() << "Tried to set invalid theme:" << name;
-    }
+    m_themeManager->setApplicationTheme(name, initial);
 }
 
 void Application::setIconTheme(const QString& name)
 {
-    QIcon::setThemeName(name);
+    m_themeManager->setIconTheme(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
@@ -1622,4 +1593,18 @@ QString Application::getUserAgentUncached()
     }
 
     return BuildConfig.USER_AGENT_UNCACHED;
+}
+
+int Application::suitableMaxMem()
+{
+    float totalRAM = (float)Sys::getSystemRam() / (float)Sys::mebibyte;
+    int maxMemoryAlloc;
+
+    // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
+    if (totalRAM < (4096 * 1.5))
+        maxMemoryAlloc = (int) (totalRAM / 1.5);
+    else
+        maxMemoryAlloc = 4096;
+
+    return maxMemoryAlloc;
 }

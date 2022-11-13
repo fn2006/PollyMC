@@ -25,6 +25,7 @@ set(Launcher_DesktopFileName "org.fn2006.PollyMC.desktop" PARENT_SCOPE)
 set(Launcher_SVGFileName "org.fn2006.PollyMC.svg" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/org.fn2006.PollyMC.desktop" PARENT_SCOPE)
+set(Launcher_mrpack_MIMEInfo "program_info/modrinth-mrpack-mime.xml" PARENT_SCOPE)
 set(Launcher_MetaInfo "program_info/org.fn2006.PollyMC.metainfo.xml" PARENT_SCOPE)
 set(Launcher_SVG "program_info/org.fn2006.PollyMC.svg" PARENT_SCOPE)
 set(Launcher_Branding_ICNS "program_info/prismlauncher.icns" PARENT_SCOPE)

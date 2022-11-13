@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -311,9 +312,12 @@ void LauncherPage::applySettings()
         s->set("IconTheme", "flat");
         break;
     case 7:
-        s->set("IconTheme", "multimc");
+        s->set("IconTheme", "flat_white");
         break;
     case 8:
+        s->set("IconTheme", "multimc");
+        break;
+    case 9:
         s->set("IconTheme", "custom");
         break;
     }
@@ -329,6 +333,18 @@ void LauncherPage::applySettings()
     {
         s->set("ApplicationTheme", newAppTheme);
         APPLICATION->setApplicationTheme(newAppTheme, false);
+    }
+
+    switch (ui->themeBackgroundCat->currentIndex()) {
+    case 0: // original cat
+        s->set("BackgroundCat", "kitteh");
+        break;
+    case 1: // rory the cat
+        s->set("BackgroundCat", "rory");
+        break;
+    case 2: // rory the cat flat edition
+        s->set("BackgroundCat", "rory-flat");
+        break;
     }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
@@ -381,41 +397,16 @@ void LauncherPage::loadSettings()
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();
-    if (theme == "pe_colored")
-    {
-        ui->themeComboBox->setCurrentIndex(0);
-    }
-    else if (theme == "pe_light")
-    {
-        ui->themeComboBox->setCurrentIndex(1);
-    }
-    else if (theme == "pe_dark")
-    {
-        ui->themeComboBox->setCurrentIndex(2);
-    }
-    else if (theme == "pe_blue")
-    {
-        ui->themeComboBox->setCurrentIndex(3);
-    }
-    else if (theme == "OSX")
-    {
-        ui->themeComboBox->setCurrentIndex(4);
-    }
-    else if (theme == "iOS")
-    {
-        ui->themeComboBox->setCurrentIndex(5);
-    }
-    else if (theme == "flat")
-    {
-        ui->themeComboBox->setCurrentIndex(6);
-    }
-    else if (theme == "multimc")
-    {
-        ui->themeComboBox->setCurrentIndex(7);
-    }
-    else if (theme == "custom")
-    {
-        ui->themeComboBox->setCurrentIndex(8);
+    QStringList iconThemeOptions{"pe_colored", "pe_light", "pe_dark", "pe_blue", "OSX", "iOS", "flat", "flat_white", "multimc", "custom"};
+    ui->themeComboBox->setCurrentIndex(iconThemeOptions.indexOf(theme));
+
+    auto cat = s->get("BackgroundCat").toString();
+    if (cat == "kitteh") {
+        ui->themeBackgroundCat->setCurrentIndex(0);
+    } else if (cat == "rory") {
+        ui->themeBackgroundCat->setCurrentIndex(1);
+    } else if (cat == "rory-flat") {
+        ui->themeBackgroundCat->setCurrentIndex(2);
     }
 
     {

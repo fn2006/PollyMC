@@ -2,7 +2,16 @@
 <RCC version="1.0">
     <qresource prefix="/backgrounds">
         <file alias="kitteh">Polly.png</file>
-        <file alias="catmas">PollyChristmas.png</file>
-        <file alias="cattiversary">PollyParty.png</file>
+        <file alias="kitteh-xmas">PollyChristmas.png</file>
+        <file alias="kitteh-bday">PollyParty.png</file>
+        <file alias="kitteh-spooky">kitteh-spooky.png</file>
+        <file alias="rory">rory.png</file>
+        <file alias="rory-xmas">rory-xmas.png</file>
+        <file alias="rory-bday">rory-bday.png</file>
+        <file alias="rory-spooky">rory-spooky.png</file>
+        <file alias="rory-flat">rory-flat.png</file>
+        <file alias="rory-flat-xmas">rory-flat-xmas.png</file>
+        <file alias="rory-flat-bday">rory-flat-bday.png</file>
+        <file alias="rory-flat-spooky">rory-flat-spooky.png</file>
     </qresource>
 </RCC>
