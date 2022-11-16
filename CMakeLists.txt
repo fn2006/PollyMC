@@ -34,6 +34,11 @@ set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 
+# ATL's packlist needs more than the default 1 Mib stack on windows
+if(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+endif()
+
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
@@ -77,7 +82,7 @@ set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRIN
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR 5)
-set(Launcher_VERSION_MINOR 1)
+set(Launcher_VERSION_MINOR 2)
 
 set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
 set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.0.0")
