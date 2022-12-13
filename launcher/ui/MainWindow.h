@@ -128,6 +128,10 @@ private slots:
 
     void on_actionClearMetadata_triggered();
 
+    #ifdef Q_OS_MAC
+    void on_actionAddToPATH_triggered();
+    #endif
+
     void on_actionOpenWiki_triggered();
 
     void on_actionMoreNews_triggered();
@@ -157,6 +161,8 @@ private slots:
 
     void on_actionEditInstance_triggered();
 
+    void on_actionCreateInstanceShortcut_triggered();
+
     void taskEnd();
 
     /**
@@ -169,6 +175,8 @@ private slots:
     void updateMainToolBar();
 
     void updateToolsMenu();
+
+    void updateThemeMenu();
 
     void instanceActivated(QModelIndex);
 
@@ -202,6 +210,8 @@ private slots:
     void konamiTriggered();
 
     void globalSettingsClosed();
+
+    void lockToolbars(bool);
 
 #ifndef Q_OS_MAC
     void keyReleaseEvent(QKeyEvent *event) override;

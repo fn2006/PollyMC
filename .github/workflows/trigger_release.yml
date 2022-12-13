@@ -12,6 +12,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       build_type: Release
+      is_qt_cached: false
     secrets:
       SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
 
@@ -36,7 +37,7 @@ jobs:
         run: |
           mv ${{ github.workspace }}/PollyMC-source PollyMC-${{ env.VERSION }}
           mv PollyMC-Linux-Qt6-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-          mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
           mv PollyMC-Linux-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux*/PollyMC.tar.gz PollyMC-Linux-${{ env.VERSION }}.tar.gz
           mv PollyMC-*.AppImage/PollyMC-*.AppImage PollyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
@@ -45,13 +46,26 @@ jobs:
 
           tar -czf PollyMC-${{ env.VERSION }}.tar.gz PollyMC-${{ env.VERSION }}
 
-          for d in PollyMC-Windows-*; do
+          for d in PollyMC-Windows-MSVC*; do
             cd "${d}" || continue
             LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
+            ARM64="$(echo -n ${d} | grep -o arm64 || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PollyMC-Windows"
+            NAME="PollyMC-Windows-MSVC"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
+            test -z "${ARM64}" || NAME="${NAME}-arm64"
+            test -z "${PORT}" || NAME="${NAME}-Portable"
+            test -z "${INST}" || mv PollyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
+            cd ..
+          done
+
+          for d in PollyMC-Windows-MinGW-w64*; do
+            cd "${d}" || continue
+            INST="$(echo -n ${d} | grep -o Setup || true)"
+            PORT="$(echo -n ${d} | grep -o Portable || true)"
+            NAME="PollyMC-Windows-MinGW-w64"
             test -z "${PORT}" || NAME="${NAME}-Portable"
             test -z "${INST}" || mv PollyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
@@ -72,14 +86,20 @@ jobs:
             PollyMC-Linux-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-            PollyMC-Windows-Legacy-${{ env.VERSION }}.zip
             PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PollyMC-Windows-Legacy-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-Legacy-Setup-${{ env.VERSION }}.exe
-            PollyMC-Windows-${{ env.VERSION }}.zip
-            PollyMC-Windows-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MinGW-w64-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-Legacy-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Legacy-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-arm64-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Setup-${{ env.VERSION }}.exe
             PollyMC-macOS-${{ env.VERSION }}.tar.gz
             PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
             PollyMC-${{ env.VERSION }}.tar.gz

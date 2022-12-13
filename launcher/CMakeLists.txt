@@ -31,6 +31,8 @@ set(CORE_SOURCES
     # Basic instance manipulation tasks (derived from InstanceTask)
     InstanceCreationTask.h
     InstanceCreationTask.cpp
+    InstanceCopyPrefs.h
+    InstanceCopyPrefs.cpp
     InstanceCopyTask.h
     InstanceCopyTask.cpp
     InstanceImportTask.h
@@ -87,7 +89,18 @@ set(CORE_SOURCES
     # Time
     MMCTime.h
     MMCTime.cpp
+
+    MTPixmapCache.h
 )
+if (UNIX AND NOT CYGWIN AND NOT APPLE)
+set(CORE_SOURCES
+    ${CORE_SOURCES}
+
+    # MangoHud
+    MangoHud.h
+    MangoHud.cpp
+    )
+endif()
 
 set(PATHMATCHER_SOURCES
     # Path matchers
@@ -95,6 +108,7 @@ set(PATHMATCHER_SOURCES
     pathmatcher/IPathMatcher.h
     pathmatcher/MultiMatcher.h
     pathmatcher/RegexpMatcher.h
+    pathmatcher/SimplePrefixMatcher.h
 )
 
 set(NET_SOURCES
@@ -547,9 +561,6 @@ set(ATLAUNCHER_SOURCES
 
 ################################ COMPILE ################################
 
-# we need zlib
-find_package(ZLIB REQUIRED)
-
 set(LOGIC_SOURCES
     ${CORE_SOURCES}
     ${PATHMATCHER_SOURCES}
@@ -584,6 +595,8 @@ SET(LAUNCHER_SOURCES
     # Application base
     Application.h
     Application.cpp
+    DataMigrationTask.h
+    DataMigrationTask.cpp
     UpdateController.cpp
     UpdateController.h
     ApplicationMessage.h
@@ -607,9 +620,12 @@ SET(LAUNCHER_SOURCES
     resources/pe_light/pe_light.qrc
     resources/pe_colored/pe_colored.qrc
     resources/pe_blue/pe_blue.qrc
+    resources/breeze_dark/breeze_dark.qrc
+    resources/breeze_light/breeze_light.qrc
     resources/OSX/OSX.qrc
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
+    resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
     ../${Launcher_Branding_LogoQRC}
 
@@ -657,6 +673,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/ITheme.h
     ui/themes/SystemTheme.cpp
     ui/themes/SystemTheme.h
+    ui/themes/ThemeManager.cpp
+    ui/themes/ThemeManager.h
 
     # Processes
     LaunchController.h
@@ -681,6 +699,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/GameOptionsPage.h
     ui/pages/instance/VersionPage.cpp
     ui/pages/instance/VersionPage.h
+    ui/pages/instance/ManagedPackPage.cpp
+    ui/pages/instance/ManagedPackPage.h
     ui/pages/instance/TexturePackPage.h
     ui/pages/instance/ResourcePackPage.h
     ui/pages/instance/ShaderPackPage.h
@@ -799,6 +819,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ExportInstanceDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
+    ui/dialogs/ImportResourcePackDialog.cpp
+    ui/dialogs/ImportResourcePackDialog.h
     ui/dialogs/LoginDialog.cpp
     ui/dialogs/LoginDialog.h
     ui/dialogs/MSALoginDialog.cpp
@@ -920,6 +942,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/instance/OtherLogsPage.ui
     ui/pages/instance/InstanceSettingsPage.ui
     ui/pages/instance/VersionPage.ui
+    ui/pages/instance/ManagedPackPage.ui
     ui/pages/instance/WorldListPage.ui
     ui/pages/instance/ScreenshotsPage.ui
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
@@ -947,6 +970,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/IconPickerDialog.ui
+    ui/dialogs/ImportResourcePackDialog.ui
     ui/dialogs/MSALoginDialog.ui
     ui/dialogs/OfflineLoginDialog.ui
     ui/dialogs/ElybyLoginDialog.ui
@@ -966,6 +990,8 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/pe_light/pe_light.qrc
     resources/pe_colored/pe_colored.qrc
     resources/pe_blue/pe_blue.qrc
+    resources/breeze_dark/breeze_dark.qrc
+    resources/breeze_light/breeze_light.qrc
     resources/OSX/OSX.qrc
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
@@ -1072,96 +1098,95 @@ if(INSTALL_BUNDLE STREQUAL "full")
         COMPONENT Runtime
     )
     # Bundle plugins
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        # Image formats
+    # Image formats
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "tga|tiff|mng" EXCLUDE
+    )
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "tga|tiff|mng" EXCLUDE
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # Icon engines
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "fontawesome" EXCLUDE
+    )
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "fontawesome" EXCLUDE
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # Platform plugins
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "minimal|linuxfb|offscreen" EXCLUDE
+    )
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "minimal|linuxfb|offscreen" EXCLUDE
+        REGEX "[^2]d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # Style plugins
+    if(EXISTS "${QT_PLUGINS_DIR}/styles")
         install(
-            DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+            DIRECTORY "${QT_PLUGINS_DIR}/styles"
+            CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "tga|tiff|mng" EXCLUDE
         )
-        # Icon engines
         install(
-            DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+            DIRECTORY "${QT_PLUGINS_DIR}/styles"
+            CONFIGURATIONS Release MinSizeRel
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "fontawesome" EXCLUDE
-        )
-        # Platform plugins
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "minimal|linuxfb|offscreen" EXCLUDE
-        )
-        # Style plugins
-        if(EXISTS "${QT_PLUGINS_DIR}/styles")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/styles"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-            )
-        endif()
-        # TLS plugins (Qt 6 only)
-        if(EXISTS "${QT_PLUGINS_DIR}/tls")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/tls"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-            )
-        endif()
-    else()
-        # Image formats
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "tga|tiff|mng" EXCLUDE
             REGEX "d\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
-        # Icon engines
+    endif()
+    # TLS plugins (Qt 6 only)
+    if(EXISTS "${QT_PLUGINS_DIR}/tls")
         install(
-            DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+            DIRECTORY "${QT_PLUGINS_DIR}/tls"
+            CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "fontawesome" EXCLUDE
-            REGEX "d\\." EXCLUDE
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/tls"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
-        # Platform plugins
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "minimal|linuxfb|offscreen" EXCLUDE
-            REGEX "d\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-        # Style plugins
-        if(EXISTS "${QT_PLUGINS_DIR}/styles")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/styles"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-                REGEX "d\\." EXCLUDE
-                REGEX "_debug\\." EXCLUDE
-                REGEX "\\.dSYM" EXCLUDE
-            )
-        endif()
-        # TLS plugins (Qt 6 only)
-        if(EXISTS "${QT_PLUGINS_DIR}/tls")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/tls"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-                REGEX "_debug\\." EXCLUDE
-                REGEX "\\.dSYM" EXCLUDE
-            )
-        endif()
     endif()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"

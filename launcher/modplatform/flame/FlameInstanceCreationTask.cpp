@@ -1,3 +1,38 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "FlameInstanceCreationTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
@@ -46,13 +81,19 @@ bool FlameCreationTask::updateInstance()
     auto instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    auto inst = instance_list->getInstanceByManagedName(originalName());
+    InstancePtr inst;
+    if (auto original_id = originalInstanceID(); !original_id.isEmpty()) {
+        inst = instance_list->getInstanceById(original_id);
+        Q_ASSERT(inst);
+    } else {
+        inst = instance_list->getInstanceByManagedName(originalName());
 
-    if (!inst) {
-        inst = instance_list->getInstanceById(originalName());
+        if (!inst) {
+            inst = instance_list->getInstanceById(originalName());
 
-        if (!inst)
-            return false;
+            if (!inst)
+                return false;
+        }
     }
 
     QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
@@ -67,24 +108,14 @@ bool FlameCreationTask::updateInstance()
     auto version_id = inst->getManagedPackVersionName();
     auto version_str = !version_id.isEmpty() ? tr(" (version %1)").arg(version_id) : "";
 
-    auto info = CustomMessageBox::selectable(
-        m_parent, tr("Similar modpack was found!"),
-        tr("One or more of your instances are from this same modpack%1. Do you want to create a "
-           "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
-           "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
-            .arg(version_str), QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
-    info->setButtonText(QMessageBox::Ok, tr("Update existing instance"));
-    info->setButtonText(QMessageBox::Abort, tr("Create new instance"));
-    info->setButtonText(QMessageBox::Reset, tr("Cancel"));
-
-    info->exec();
-
-    if (info->clickedButton() == info->button(QMessageBox::Abort))
-        return false;
-
-    if (info->clickedButton() == info->button(QMessageBox::Reset)) {
-        m_abort = true;
-        return false;
+    if (shouldConfirmUpdate()) {
+        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        if (should_update == ShouldUpdate::SkipUpdating)
+            return false;
+        if (should_update == ShouldUpdate::Cancel) {
+            m_abort = true;
+            return false;
+        }
     }
 
     QDir old_inst_dir(inst->instanceRoot());
@@ -197,10 +228,10 @@ bool FlameCreationTask::updateInstance()
         m_process_update_file_info_job = nullptr;
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent,
-                tr("No index file."),
-                tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
-                QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                      "of the files to be duplicated. Do you want to continue?"),
+                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
             m_abort = true;
@@ -208,7 +239,7 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
-    setOverride(true);
+    setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
     m_instance = inst;
@@ -330,7 +361,7 @@ bool FlameCreationTask::createInstance()
         FS::deletePath(jarmodsPath);
     }
 
-    instance.setManagedPack("flame", {}, m_pack.name, {}, m_pack.version);
+    instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
     instance.setName(name());
 
     m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
@@ -338,6 +369,7 @@ bool FlameCreationTask::createInstance()
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason) {
         m_mod_id_resolver.reset();
         setError(tr("Unable to resolve mod IDs:\n") + reason);
+        loop.quit();
     });
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
@@ -353,14 +385,6 @@ bool FlameCreationTask::createInstance()
         setAbortable(false);
         auto inst = m_instance.value();
 
-        // Only change the name if it didn't use a custom name, so that the previous custom name
-        // is preserved, but if we're using the original one, we update the version string.
-        // NOTE: This needs to come before the copyManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName())) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
-                inst->setName(instance.name());
-        }
-
         inst->copyManagedPack(instance);
     }
 
@@ -372,27 +396,36 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     auto results = m_mod_id_resolver->getResults();
 
     // first check for blocked mods
-    QString text;
-    QList<QUrl> urls;
+    QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
         if (!result.resolved || result.url.isEmpty()) {
-            text += QString("%1: <a href='%2'>%2</a><br/>").arg(result.fileName, result.websiteUrl);
-            urls.append(QUrl(result.websiteUrl));
+            BlockedMod blocked_mod;
+            blocked_mod.name = result.fileName;
+            blocked_mod.websiteUrl = result.websiteUrl;
+            blocked_mod.hash = result.hash;
+            blocked_mod.matched = false;
+            blocked_mod.localPath = "";
+            blocked_mod.targetFolder = result.targetFolder;
+
+            blocked_mods.append(blocked_mod);
+
             anyBlocked = true;
         }
     }
     if (anyBlocked) {
         qWarning() << "Blocked mods found, displaying mod list";
 
-        auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
-                                                   tr("The following mods were blocked on third party launchers.<br/>"
-                                                      "You will need to manually download them and add them to the modpack"),
-                                                   text,
-                                                   urls);
-        message_dialog->setModal(true);
+        BlockedModsDialog message_dialog(m_parent, tr("Blocked mods found"),
+                                         tr("The following files are not available for download in third party launchers.<br/>"
+                                            "You will need to manually download them and add them to the instance."),
+                                         blocked_mods);
 
-        if (message_dialog->exec()) {
+        message_dialog.setModal(true);
+
+        if (message_dialog.exec()) {
+            qDebug() << "Post dialog blocked mods list: " << blocked_mods;
+            copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {
             m_mod_id_resolver.reset();
@@ -402,6 +435,38 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     } else {
         setupDownloadJob(loop);
     }
+}
+
+/// @brief copy the matched blocked mods to the instance staging area
+/// @param blocked_mods list of the blocked mods and their matched paths
+void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
+{
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = blocked_mods.length();
+    setProgress(i, total);
+    for (auto const& mod : blocked_mods) {
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
+
+        if (!FS::copy(mod.localPath, dest_path)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
+        }
+
+        i++;
+        setProgress(i, total);
+    }
+
+    setAbortable(true);
 }
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
@@ -442,14 +507,12 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
 
     m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
-        m_files_job.reset();
-    });
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { m_files_job.reset(); });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));

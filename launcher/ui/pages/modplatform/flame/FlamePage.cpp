@@ -43,6 +43,10 @@
 #include "InstanceImportTask.h"
 #include "Json.h"
 #include "ui/dialogs/NewInstanceDialog.h"
+#include "ui/widgets/ProjectItem.h"
+#include "modplatform/flame/FlameAPI.h"
+
+static FlameAPI api;
 
 FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
 {
@@ -66,6 +70,9 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlamePage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
+    ui->packDescription->setMetaEntry("FlamePacks");
 }
 
 FlamePage::~FlamePage()
@@ -190,12 +197,18 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (selectedVersion.isEmpty() || selectedVersion == "-1") {
+    if (m_selected_version_index == -1) {
         dialog->setSuggestedPack();
         return;
     }
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion,this));
+    auto version = current.versions.at(m_selected_version_index);
+
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", QString::number(current.addonId));
+    extra_info.insert("pack_version_id", QString::number(version.fileId));
+
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
     listModel->getLogo(current.logoName, current.logoUrl,
@@ -204,11 +217,18 @@ void FlamePage::suggestCurrent()
 
 void FlamePage::onVersionSelectionChanged(QString data)
 {
-    if (data.isNull() || data.isEmpty()) {
-        selectedVersion = "";
+    bool is_blocked = false;
+    ui->versionSelectionBox->currentData().toInt(&is_blocked);
+
+    if (data.isNull() || data.isEmpty() || is_blocked) {
+        m_selected_version_index = -1;
         return;
     }
-    selectedVersion = ui->versionSelectionBox->currentData().toString();
+
+    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+
+    Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
+
     suggestCurrent();
 }
 
@@ -250,7 +270,10 @@ void FlamePage::updateUi()
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
     }
 
+
     text += "<hr>";
+    text += api.getModDescription(current.addonId).toUtf8();
 
     ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->flush();
 }

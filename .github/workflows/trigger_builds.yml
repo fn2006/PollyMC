@@ -3,12 +3,11 @@ name: Build Application
 on:
   push:
     branches-ignore:
-      - 'stable'
+      - 'renovate/**'
     paths-ignore:
       - '**.md'
       - '**/LICENSE'
       - 'flake.lock'
-      - '**.nix'
       - 'packages/**'
       - '.github/ISSUE_TEMPLATE/**'
   pull_request:
@@ -16,7 +15,6 @@ on:
       - '**.md'
       - '**/LICENSE'
       - 'flake.lock'
-      - '**.nix'
       - 'packages/**'
       - '.github/ISSUE_TEMPLATE/**'
   workflow_dispatch:
@@ -28,5 +26,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       build_type: Debug
+      is_qt_cached: true
     secrets:
       SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
