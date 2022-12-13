@@ -351,6 +351,9 @@ void LauncherPage::applySettings()
     case 2: // rory the cat flat edition
         s->set("BackgroundCat", "rory-flat");
         break;
+    case 3: // polly the parrot
+        s->set("BackgroundCat", "polly");
+        break;
     }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
@@ -424,6 +427,8 @@ void LauncherPage::loadSettings()
         ui->themeBackgroundCat->setCurrentIndex(1);
     } else if (cat == "rory-flat") {
         ui->themeBackgroundCat->setCurrentIndex(2);
+    } else if (cat == "polly") {
+        ui->themeBackgroundCat->setCurrentIndex(3);
     }
 
     {
