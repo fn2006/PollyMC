@@ -1177,6 +1177,8 @@ if(INSTALL_BUNDLE STREQUAL "full")
             CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
+            PATTERN "*qopensslbackend*" EXCLUDE
+            PATTERN "*qcertonlybackend*" EXCLUDE
         )
         install(
             DIRECTORY "${QT_PLUGINS_DIR}/tls"
@@ -1186,6 +1188,8 @@ if(INSTALL_BUNDLE STREQUAL "full")
             REGEX "dd\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
+            PATTERN "*qopensslbackend*" EXCLUDE
+            PATTERN "*qcertonlybackend*" EXCLUDE
         )
     endif()
     configure_file(
