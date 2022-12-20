@@ -28,19 +28,28 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 if(MSVC)
-    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
-    # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
     # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
-    set(CMAKE_CXX_FLAGS "/W4 /permissive- /GS ${CMAKE_CXX_FLAGS}")
+    # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
+    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    set(CMAKE_CXX_FLAGS "/GS /permissive- /W4 ${CMAKE_CXX_FLAGS}")
 
     # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
     # This implicitly selects an entrypoint specific to the subsystem selected
     # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
     # Additinaly LINK autodetects we use a GUI so we can omit /SUBSYSTEM
     # This allows tests to still use have console without using seperate linker flags
+    # /LTCG allows for linking wholy optimizated programs
     # /MANIFEST:NO disables generating a manifest file, we instead provide our own
     # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
-    set(CMAKE_EXE_LINKER_FLAGS "/MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "/LTCG /MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+    # /GL enables whole program optimizations
+    # /Gw helps reduce binary size
+    # /Gy allows the compiler to package individual functions
+    # /guard:cf enables control flow guard
+    foreach(lang C CXX)
+        set("CMAKE_${lang}_FLAGS_RELEASE" "/GL /Gw /Gy /guard:cf")
+    endforeach()
 
     # See https://github.com/ccache/ccache/issues/1040
     # Note, CMake 3.25 replaces this with CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
@@ -69,6 +78,9 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
+
+# Fix aarch64 build for toml++
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
 
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -126,7 +138,7 @@ set(Launcher_NEWS_OPEN_URL "https://prismlauncher.org/news" CACHE STRING "URL th
 set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR 6)
+set(Launcher_VERSION_MAJOR 7)
 set(Launcher_VERSION_MINOR 0)
 
 set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
@@ -217,7 +229,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat)
     list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
@@ -231,12 +243,16 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-include(ECMQueryQt)
-ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
-ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
-ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
-ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
-set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
+if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+    include(ECMQueryQt)
+    ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+    ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+    ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+else()
+    set(QT_PLUGINS_DIR  ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_PLUGINS})
+    set(QT_LIBS_DIR     ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBS})
+    set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
+endif()
 
 # NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
@@ -364,11 +380,11 @@ if(NOT ZLIB_FOUND)
     set(SKIP_INSTALL_ALL ON)
     add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
     
-    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib")
+    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib" CACHE STRING "")
     set_target_properties(zlibstatic PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
     add_library(ZLIB::ZLIB ALIAS zlibstatic)
-    set(ZLIB_LIBRARY ZLIB::ZLIB)
-    set(ZLIB_FOUND true)
+    set(ZLIB_LIBRARY ZLIB::ZLIB CACHE STRING "zlib library name")
+
     find_package(ZLIB REQUIRED)
 else()
     message(STATUS "Using system zlib")

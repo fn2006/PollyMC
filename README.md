@@ -13,3 +13,4 @@ Binaries can be found in releases.
 Workaround for downloading from CurseForge and FTB not working [here](https://github.com/fn2006/PollyMC/wiki/CurseForge-Workaround).
 
 To build this yourself, follow the instructions on the Prism Launcher website but clone this repo instead.
+

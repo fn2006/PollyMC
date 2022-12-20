@@ -1,4 +1,7 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
@@ -38,10 +41,14 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "DataMigrationTask.h"
 #include "net/PasteUpload.h"
+#include "pathmatcher/MultiMatcher.h"
+#include "pathmatcher/SimplePrefixMatcher.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/AccessibleInstanceView.h"
 
 #include "ui/pages/BasePageProvider.h"
@@ -90,6 +97,7 @@
 #include <QIcon>
 
 #include "InstanceList.h"
+#include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
@@ -118,6 +126,7 @@
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
 #include "gamemode_client.h"
+#include "MangoHud.h"
 #endif
 
 
@@ -133,6 +142,8 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 static const QLatin1String liveCheckFile("live.check");
+
+PixmapCache* PixmapCache::s_instance = nullptr;
 
 namespace {
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -226,7 +237,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
-    setApplicationVersion(BuildConfig.printableVersionString());
+    setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
     setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
     startTime = QDateTime::currentDateTime();
 
@@ -300,24 +311,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
-
-		/*
-        QDir polymcData(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "PolyMC"));
-        if (polymcData.exists()) {
-            dataPath = polymcData.absolutePath();
-            adjustedBy = "PolyMC data path";
-        }
-        */
-
-#ifdef Q_OS_LINUX
-        // TODO: this should be removed in a future version
-        // TODO: provide a migration path similar to macOS migration
-        QDir bar(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "polymc"));
-        if (bar.exists()) {
-            dataPath = bar.absolutePath();
-            adjustedBy = "Legacy data path";
-        }
-#endif
 
 #ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
@@ -439,6 +432,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         qInstallMessageHandler(appDebugOutput);
         qDebug() << "<> Log initialized.";
+    }
+
+    {
+        bool migrated = false;
+
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC", "polymc.cfg");
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../multimc"), "MultiMC", "multimc.cfg");
     }
 
     {
@@ -695,6 +697,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
         }
+
+        PixmapCache::setInstance(new PixmapCache(this));
+
         qDebug() << "<> Settings loaded.";
     }
 
@@ -918,13 +923,13 @@ bool Application::createSetupWizard()
     return false;
 }
 
-bool Application::event(QEvent* event) {
+bool Application::event(QEvent* event)
+{
 #ifdef Q_OS_MACOS
     if (event->type() == QEvent::ApplicationStateChange) {
         auto ev = static_cast<QApplicationStateChangeEvent*>(event);
 
-        if (m_prevAppState == Qt::ApplicationActive
-                && ev->applicationState() == Qt::ApplicationActive) {
+        if (m_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();
@@ -1522,17 +1527,8 @@ void Application::updateCapabilities()
     if (gamemode_query_status() >= 0)
         m_capabilities |= SupportsGameMode;
 
-    {
-        void *dummy = dlopen("libMangoHud_dlsym.so", RTLD_LAZY);
-        // try normal variant as well
-        if (dummy == NULL)
-            dummy = dlopen("libMangoHud.so", RTLD_LAZY);
-
-        if (dummy != NULL) {
-            dlclose(dummy);
-            m_capabilities |= SupportsMangoHud;
-        }
-    }
+    if (!MangoHud::getLibraryString().isEmpty())
+        m_capabilities |= SupportsMangoHud;
 #endif
 }
 
@@ -1608,3 +1604,89 @@ int Application::suitableMaxMem()
 
     return maxMemoryAlloc;
 }
+
+bool Application::handleDataMigration(const QString& currentData,
+                                      const QString& oldData,
+                                      const QString& name,
+                                      const QString& configFile) const
+{
+    QString nomigratePath = FS::PathCombine(currentData, name + "_nomigrate.txt");
+    QStringList configPaths = { FS::PathCombine(oldData, configFile), FS::PathCombine(oldData, BuildConfig.LAUNCHER_CONFIGFILE) };
+
+    QLocale locale;
+
+    // Is there a valid config at the old location?
+    bool configExists = false;
+    for (QString configPath : configPaths) {
+        configExists |= QFileInfo::exists(configPath);
+    }
+
+    if (!configExists || QFileInfo::exists(nomigratePath)) {
+        qDebug() << "<> No migration needed from" << name;
+        return false;
+    }
+
+    QString message;
+    bool currentExists = QFileInfo::exists(FS::PathCombine(currentData, BuildConfig.LAUNCHER_CONFIGFILE));
+
+    if (currentExists) {
+        message = tr("Old data from %1 was found, but you already have existing data for %2. Sadly you will need to migrate yourself. Do "
+                     "you want to be reminded of the pending data migration next time you start %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+    } else {
+        message = tr("It looks like you used %1 before. Do you want to migrate your data to the new location of %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+
+        QFileInfo logInfo(FS::PathCombine(oldData, name + "-0.log"));
+        if (logInfo.exists()) {
+            QString lastModified = logInfo.lastModified().toString(locale.dateFormat());
+            message = tr("It looks like you used %1 on %2 before. Do you want to migrate your data to the new location of %3?")
+                          .arg(name, lastModified, BuildConfig.LAUNCHER_DISPLAYNAME);
+        }
+    }
+
+    QMessageBox::StandardButton askMoveDialogue =
+        QMessageBox::question(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, message, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    auto setDoNotMigrate = [&nomigratePath] {
+        QFile file(nomigratePath);
+        file.open(QIODevice::WriteOnly);
+    };
+
+    // create no-migrate file if user doesn't want to migrate
+    if (askMoveDialogue != QMessageBox::Yes) {
+        qDebug() << "<> Migration declined for" << name;
+        setDoNotMigrate();
+        return currentExists;  // cancel further migrations, if we already have a data directory
+    }
+
+    if (!currentExists) {
+        // Migrate!
+        auto matcher = std::make_shared<MultiMatcher>();
+        matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
+        matcher->add(std::make_shared<SimplePrefixMatcher>(
+            BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("icons/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("instances/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("libraries/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("mods/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("themes/"));
+
+        ProgressDialog diag;
+        DataMigrationTask task(nullptr, oldData, currentData, matcher);
+        if (diag.execWithTask(&task)) {
+            qDebug() << "<> Migration succeeded";
+            setDoNotMigrate();
+        } else {
+            QString reason = task.failReason();
+            QMessageBox::critical(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, tr("Migration failed! Reason: %1").arg(reason));
+        }
+    } else {
+        qWarning() << "<> Migration was skipped, due to existing data";
+    }
+    return true;
+}
+

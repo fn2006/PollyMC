@@ -242,7 +242,7 @@ Qt::DropActions IconList::supportedDropActions() const
     return Qt::CopyAction;
 }
 
-bool IconList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+bool IconList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[maybe_unused]] int row, [[maybe_unused]] int column, [[maybe_unused]] const QModelIndex &parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -302,7 +302,7 @@ QVariant IconList::data(const QModelIndex &index, int role) const
 
 int IconList::rowCount(const QModelIndex &parent) const
 {
-    return icons.size();
+    return parent.isValid() ? 0 : icons.size();
 }
 
 void IconList::installIcons(const QStringList &iconFiles)
@@ -354,15 +354,18 @@ const MMCIcon *IconList::icon(const QString &key) const
 
 bool IconList::deleteIcon(const QString &key)
 {
-    int iconIdx = getIconIndex(key);
-    if (iconIdx == -1)
+    if (!iconFileExists(key))
         return false;
-    auto &iconEntry = icons[iconIdx];
-    if (iconEntry.has(IconType::FileBased))
-    {
-        return QFile::remove(iconEntry.m_images[IconType::FileBased].filename);
-    }
-    return false;
+
+    return QFile::remove(icon(key)->getFilePath());
+}
+
+bool IconList::trashIcon(const QString &key)
+{
+    if (!iconFileExists(key))
+        return false;
+
+    return FS::trash(icon(key)->getFilePath(), nullptr);
 }
 
 bool IconList::addThemeIcon(const QString& key)
