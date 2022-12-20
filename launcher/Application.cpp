@@ -103,6 +103,8 @@
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
 
+#include "ui/GuiUtil.h"
+
 #include "java/JavaUtils.h"
 
 #include "updater/UpdateChecker.h"
@@ -682,6 +684,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->set("FlameKeyOverride", flameKey);
             m_settings->reset("CFKeyOverride");
         }
+        m_settings->registerSetting("FlameKeyShouldBeFetchedOnStartup", true);
         m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
@@ -953,6 +956,7 @@ void Application::setupWizardFinished(int status)
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
+
     if(!m_instanceIdToLaunch.isEmpty())
     {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
@@ -992,6 +996,22 @@ void Application::performMainStartupAction()
             return;
         }
     }
+
+    {
+        bool shouldFetch = m_settings->get("FlameKeyShouldBeFetchedOnStartup").toBool();
+        if (!BuildConfig.FLAME_API_KEY_API_URL.isEmpty() && shouldFetch && !(capabilities() & Capability::SupportsFlame))
+        {
+            // don't ask, just fetch
+            QString apiKey = GuiUtil::fetchFlameKey();
+            if (!apiKey.isEmpty())
+            {
+                m_settings->set("FlameKeyOverride", apiKey);
+                updateCapabilities();
+            }
+            m_settings->set("FlameKeyShouldBeFetchedOnStartup", false);
+        }
+    }
+
     if(!m_mainWindow)
     {
         // normal main window
