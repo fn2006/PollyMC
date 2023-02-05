@@ -28,13 +28,14 @@ InjectAuthlib::InjectAuthlib(LaunchTask *parent, AuthlibInjectorPtr* injector) :
 void InjectAuthlib::executeTask()
 {
     if (m_aborted)
+
     {
         emitFailed(tr("Task aborted."));
         return;
     }
 
     auto latestVersionInfo = QString("https://authlib-injector.yushi.moe/artifact/latest.json");
-    auto netJob = new NetJob("Injector versions info download", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Injector versions info download", APPLICATION->network());
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("injectors", "version.json");
     if (!m_offlineMode)
     {
@@ -43,8 +44,8 @@ void InjectAuthlib::executeTask()
         netJob->addNetAction(task);
 
         jobPtr.reset(netJob);
-        QObject::connect(netJob, &NetJob::succeeded, this, &InjectAuthlib::onVersionDownloadSucceeded);
-        QObject::connect(netJob, &NetJob::failed, this, &InjectAuthlib::onDownloadFailed);
+        QObject::connect(netJob.get(), &NetJob::succeeded, this, &InjectAuthlib::onVersionDownloadSucceeded);
+        QObject::connect(netJob.get(), &NetJob::failed, this, &InjectAuthlib::onDownloadFailed);
         jobPtr->start();
     }
     else
@@ -110,15 +111,15 @@ void InjectAuthlib::onVersionDownloadSucceeded()
     qDebug() << "Authlib injector version:" << m_versionName;
     if (!m_offlineMode)
     {
-        auto netJob = new NetJob("Injector download", APPLICATION->network());
+        auto netJob = makeShared<NetJob>("Injector download", APPLICATION->network());
         MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("injectors", m_versionName);
         entry->setStale(true);
         auto task = Net::Download::makeCached(QUrl(downloadUrl), entry);
         netJob->addNetAction(task);
 
         jobPtr.reset(netJob);
-        QObject::connect(netJob, &NetJob::succeeded, this, &InjectAuthlib::onDownloadSucceeded);
-        QObject::connect(netJob, &NetJob::failed, this, &InjectAuthlib::onDownloadFailed);
+        QObject::connect(netJob.get(), &NetJob::succeeded, this, &InjectAuthlib::onDownloadSucceeded);
+        QObject::connect(netJob.get(), &NetJob::failed, this, &InjectAuthlib::onDownloadFailed);
         jobPtr->start();
     }
     else

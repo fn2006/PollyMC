@@ -76,7 +76,7 @@ MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json) {
 
 MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString &username)
 {
-    MinecraftAccountPtr account = new MinecraftAccount();
+    auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Mojang;
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
@@ -92,7 +92,7 @@ MinecraftAccountPtr MinecraftAccount::createBlankMSA()
 
 MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
 {
-    MinecraftAccountPtr account = new MinecraftAccount();
+    auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Offline;
     account->data.yggdrasilToken.token = "offline";
     account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
@@ -109,7 +109,7 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
 
 MinecraftAccountPtr MinecraftAccount::createElyby(const QString &username)
 {
-    MinecraftAccountPtr account = new MinecraftAccount();
+    MinecraftAccountPtr account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Elyby;
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));

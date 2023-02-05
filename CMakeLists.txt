@@ -208,8 +208,14 @@ set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 
 ################################ 3rd Party Libs ################################
 
-if(NOT Launcher_FORCE_BUNDLED_LIBS)
+# Successive configurations of cmake without cleaning the build dir will cause zlib fallback to fail due to cached values
+# Record when fallback triggered and skip this find_package
+if(NOT Launcher_FORCE_BUNDLED_LIBS AND NOT FORCE_BUNDLED_ZLIB)
     find_package(ZLIB QUIET)
+endif()
+if(NOT ZLIB_FOUND)
+    set(FORCE_BUNDLED_ZLIB TRUE CACHE BOOL "")
+    mark_as_advanced(FORCE_BUNDLED_ZLIB)
 endif()
 
 # Find the required Qt parts
@@ -266,7 +272,12 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find ghc_filesystem
     find_package(ghc_filesystem QUIET)
+
+    # Find cmark
+    find_package(cmark QUIET)
 endif()
+
+include(ECMQtDeclareLoggingCategory)
 
 ####################################### Program Info #######################################
 
@@ -372,16 +383,26 @@ option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
 add_subdirectory(libraries/libnbtplusplus)
 
 add_subdirectory(libraries/systeminfo) # system information library
-add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
-if(NOT ZLIB_FOUND)
+if(FORCE_BUNDLED_ZLIB)
     message(STATUS "Using bundled zlib")
+
     set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # Suppress cmake warnings and allow INTERPROCEDURAL_OPTIMIZATION for zlib
     set(SKIP_INSTALL_ALL ON)
     add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
-    
-    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib" CACHE STRING "")
+
+    # On OS where unistd.h exists, zlib's generated header defines `Z_HAVE_UNISTD_H`, while the included header does not. 
+    # We cannot safely undo the rename on those systems, and they generally have packages for zlib anyway.
+    check_include_file(unistd.h NEED_GENERATED_ZCONF)
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h.included" AND NOT NEED_GENERATED_ZCONF)
+        # zlib's cmake script renames a file, dirtying the submodule, see https://github.com/madler/zlib/issues/162
+        message(STATUS "Undoing Rename")
+        message(STATUS "    ${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h")
+        file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h.included" "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h")
+    endif()
+
+    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib" "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" CACHE STRING "" FORCE)
     set_target_properties(zlibstatic PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
     add_library(ZLIB::ZLIB ALIAS zlibstatic)
     set(ZLIB_LIBRARY ZLIB::ZLIB CACHE STRING "zlib library name")
@@ -405,6 +426,16 @@ if(NOT tomlplusplus_FOUND)
     add_subdirectory(libraries/tomlplusplus) # toml parser
 else()
     message(STATUS "Using system tomlplusplus")
+endif()
+if(NOT cmark_FOUND)
+    message(STATUS "Using bundled cmark")
+    set(CMARK_STATIC ON CACHE BOOL "Build static libcmark library" FORCE)
+    set(CMARK_SHARED OFF CACHE BOOL "Build shared libcmark library" FORCE)
+    set(CMARK_TESTS OFF CACHE BOOL "Build cmark tests and enable testing" FORCE)
+    add_subdirectory(libraries/cmark EXCLUDE_FROM_ALL) # Markdown parser
+    add_library(cmark::cmark ALIAS cmark_static)
+else()
+    message(STATUS "Using system cmark")
 endif()
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
