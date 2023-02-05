@@ -62,11 +62,6 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
-#ifdef Q_OS_WIN
-#include "ui/WinDarkmode.h"
-#include <versionhelpers.h>
-#endif
-
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -148,19 +143,12 @@ static const QLatin1String liveCheckFile("live.check");
 PixmapCache* PixmapCache::s_instance = nullptr;
 
 namespace {
+
+/** This is used so that we can output to the log file in addition to the CLI. */
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    const char *levels = "DWCFIS";
-    const QString format("%1 %2 %3\n");
-
-    qint64 msecstotal = APPLICATION->timeSinceStart();
-    qint64 seconds = msecstotal / 1000;
-    qint64 msecs = msecstotal % 1000;
-    QString foo;
-    char buf[1025] = {0};
-    ::snprintf(buf, 1024, "%5lld.%03lld", seconds, msecs);
-
-    QString out = format.arg(buf).arg(levels[type]).arg(msg);
+    QString out = qFormatLogMessage(type, context, msg);
+    out += QChar::LineFeed;
 
     APPLICATION->logFile->write(out.toUtf8());
     APPLICATION->logFile->flush();
@@ -433,6 +421,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             return;
         }
         qInstallMessageHandler(appDebugOutput);
+
+        qSetMessagePattern(
+                "%{time process}" " "
+                "%{if-debug}D%{endif}" "%{if-info}I%{endif}" "%{if-warning}W%{endif}" "%{if-critical}C%{endif}" "%{if-fatal}F%{endif}"
+                " " "|" " "
+                "%{if-category}[%{category}]: %{endif}"
+                "%{message}");
+
         qDebug() << "<> Log initialized.";
     }
 
@@ -1373,16 +1369,7 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow = new MainWindow();
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
-#ifdef Q_OS_WIN
-        if (IsWindows10OrGreater())
-        {
-            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
+
         if(minimized)
         {
             m_mainWindow->showMinimized();
@@ -1559,7 +1546,8 @@ QString Application::getJarPath(QString jarFile)
         FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
-        FS::PathCombine(applicationDirPath(), "jars")
+        FS::PathCombine(applicationDirPath(), "jars"),
+        FS::PathCombine(applicationDirPath(), "..", "jars") // from inside build dir, for debuging
     };
     for(QString p : potentialPaths)
     {
