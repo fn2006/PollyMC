@@ -1,57 +1,96 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
-<svg width="48" height="48" version="1.1" viewBox="0 0 12.7 12.7" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
- <title>Prism Launcher Logo</title>
- <g stroke-width=".26458">
-  <path d="m6.35 6.35" fill="#99cd61"/>
-  <path d="m6.35 0.52917-2.5208 4.3656 2.5208 1.4552 2.5203-1.4552 0.10955-3.0996c-1.1511-0.66459-2.3388-1.2661-2.6298-1.2661z" fill="#df6277"/>
-  <path d="m8.9798 1.7952-2.6298 4.5548 2.5203 1.4552 2.5208-4.3656c-0.14552-0.25205-1.2601-0.97975-2.4112-1.6443z" fill="#fb9168"/>
-  <path d="m11.391 3.4396-5.041 2.9104 2.5203 1.4552 2.7389-1.4552c0-1.3292-0.072554-2.6584-0.21808-2.9104z" fill="#f3db6c"/>
-  <path d="m6.35 6.35v2.9104h5.041c0.14552-0.25205 0.21807-1.5812 0.21808-2.9104h-5.2591z" fill="#7ab392"/>
-  <path d="m6.35 6.35v2.9104l2.6298 1.6443c1.1511-0.66459 2.2657-1.3923 2.4112-1.6443l-5.041-2.9104z" fill="#4b7cbc"/>
-  <path d="m6.35 6.35-2.5208 1.4552 2.5208 4.3656c0.29104 0 1.4787-0.60148 2.6298-1.2661l-2.6298-4.5548z" fill="#6f488c"/>
-  <path d="m3.8292 4.8948-2.5203 4.3656c0.29104 0.5041 4.459 2.9104 5.041 2.9104v-5.8208l-2.5208-1.4552z" fill="#4d3f33"/>
-  <path d="m1.309 3.4396c-0.29104 0.5041-0.29104 5.3167 0 5.8208l5.041-2.9104v-2.9104h-5.041z" fill="#7a573b"/>
-  <path d="m6.35 0.52917c-0.58208-2e-8 -4.75 2.4063-5.041 2.9104l5.041 2.9104v-5.8208z" fill="#99cd61"/>
- </g>
- <g transform="matrix(.88 0 0 .88 -10.906 -1.2421)">
-  <g transform="translate(13.26 2.2776)">
-   <path transform="matrix(.96975 0 0 .96975 .1921 .1921)" d="m6.3498 2.9393c-0.34105 0-2.7827 1.4099-2.9532 1.7052l2.9532 5.1157 2.9538-5.1157c-0.17052-0.29535-2.6127-1.7052-2.9538-1.7052z" fill="#fff" stroke-width=".26458"/>
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg99"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="org.fn2006.PollyMC.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview101"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="12.697086"
+     inkscape:cx="35.638098"
+     inkscape:cy="31.345775"
+     inkscape:window-width="1920"
+     inkscape:window-height="994"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g5269" />
+  <defs
+     id="defs96">
+    <inkscape:path-effect
+       effect="powerclip"
+       id="path-effect5638"
+       is_visible="true"
+       lpeversion="1"
+       inverse="true"
+       flatten="false"
+       hide_clip="false"
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths." />
+    <inkscape:path-effect
+       effect="powerclip"
+       id="path-effect5562"
+       is_visible="true"
+       lpeversion="1"
+       inverse="true"
+       flatten="false"
+       hide_clip="false"
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths." />
+    <inkscape:path-effect
+       effect="powerclip"
+       id="path-effect5535"
+       is_visible="true"
+       lpeversion="1"
+       inverse="true"
+       flatten="false"
+       hide_clip="false"
+       message="Use fill-rule evenodd on &lt;b&gt;fill and stroke&lt;/b&gt; dialog if no flatten result after convert clip to paths." />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g5269"
+       clip-path="none"
+       transform="matrix(1.25,0,0,1.25,-8,-10.5)">
+      <path
+         id="path300"
+         style="fill:#8acb01"
+         d="m 8,16 c 0,12 0,24 0,36 8.010417,0 16.020833,0 24.03125,0 0,-0.8 0,-1.6 0,-2.4 3.714062,0 7.428125,0 11.142187,0 0,-0.8 0,-1.6 0,-2.4 4.275521,0 8.551042,0 12.826563,0 C 56,36.8 56,26.4 56,16 40,16 24,16 8,16 Z"
+         inkscape:label="head" />
+      <path
+         id="rect3493"
+         style="fill:#b0af8d;stroke-width:1.39562"
+         inkscape:label="cheek"
+         d="M 19.959999,28.879064 H 32.253197 V 52 H 19.959999 Z" />
+      <path
+         id="rect3491"
+         inkscape:label="eye"
+         d="M 19.960001,28 H 32.333299 V 40 H 19.960001 Z"
+         style="stroke-width:1.00871" />
+      <path
+         id="path352"
+         style="display:inline;fill:#3b3b3b;fill-opacity:1;stroke-width:1.00922"
+         d="m 32,28 c 0,7.333333 0,14.666667 0,22 4,0 8,0 12,0 0,-0.814583 0,-1.629167 0,-2.44375 4,0 8,0 12,0 C 56,41.0375 56,34.51875 56,28 48,28 40,28 32,28 Z"
+         inkscape:label="beak" />
+    </g>
   </g>
-  <path d="m16.746 6.9737 2.8639 4.9609c0.33073 0 2.6991-1.3672 2.8644-1.6536 0.16536-0.28642 0.16536-3.0209 0-3.3073l-2.8644 1.6536z" fill="#dfdfdf" stroke-width=".26458"/>
- </g>
- <path d="m3.8299 4.8948c-0.14551 0.25205-0.14553 2.6584 0 2.9104 0.14553 0.25204 2.2292 1.4552 2.5203 1.4552v-2.9104z" fill="#d6d2d2" stroke-width=".26458"/>
- <metadata>
-  <rdf:RDF>
-   <cc:Work rdf:about="">
-    <dc:title>Prism Launcher Logo</dc:title>
-    <dc:date>19/10/2022</dc:date>
-    <dc:creator>
-     <cc:Agent>
-      <dc:title>Prism Launcher</dc:title>
-     </cc:Agent>
-    </dc:creator>
-    <dc:contributor>
-     <cc:Agent>
-      <dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title>
-     </cc:Agent>
-    </dc:contributor>
-    <dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source>
-    <dc:publisher>
-     <cc:Agent>
-      <dc:title>Prism Launcher</dc:title>
-     </cc:Agent>
-    </dc:publisher>
-    <cc:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/"/>
-   </cc:Work>
-   <cc:License rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
-    <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
-    <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
-    <cc:requires rdf:resource="http://creativecommons.org/ns#Notice"/>
-    <cc:requires rdf:resource="http://creativecommons.org/ns#Attribution"/>
-    <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
-    <cc:requires rdf:resource="http://creativecommons.org/ns#ShareAlike"/>
-   </cc:License>
-  </rdf:RDF>
- </metadata>
 </svg>
