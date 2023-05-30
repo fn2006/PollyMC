@@ -23,6 +23,7 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+#include <memory>
 
 class QIODevice;
 
@@ -30,7 +31,7 @@ namespace ModPlatform {
 
 enum class ResourceProvider { MODRINTH, FLAME };
 
-enum class ResourceType { MOD, RESOURCE_PACK };
+enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
 class ProviderCapabilities {
    public:
@@ -83,6 +84,8 @@ struct ExtraPackData {
 };
 
 struct IndexedPack {
+    using Ptr = std::shared_ptr<IndexedPack>;
+
     QVariant addonId;
     ResourceProvider provider;
     QString name;

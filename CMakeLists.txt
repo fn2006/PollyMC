@@ -174,7 +174,7 @@ set(Launcher_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
-set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
 # API Keys
 # NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service
@@ -345,6 +345,8 @@ elseif(UNIX)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION "${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps")
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
 
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/launcher/qtlogging.ini" DESTINATION "${KDE_INSTALL_DATADIR}/${Launcher_Name}")
+    
     if(Launcher_ManPage)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
@@ -371,6 +373,8 @@ elseif(WIN32)
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
+
+
 
 ################################ Included Libs ################################
 
@@ -442,12 +446,11 @@ add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 if (NOT ghc_filesystem_FOUND)
     message(STATUS "Using bundled ghc_filesystem")
-    set(GHC_FILESYSTEM_WITH_INSTALL OFF) # Workaround ghc::filesystem bug
     add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-    add_library(ghcFilesystem::ghc_filesystem ALIAS ghc_filesystem)
 else()
     message(STATUS "Using system ghc_filesystem")
 endif()
+add_subdirectory(libraries/qdcss) # css parser
 
 ############################### Built Artifacts ###############################
 

@@ -15,6 +15,12 @@ on:
       SPARKLE_ED25519_KEY:
         description: Private key for signing Sparkle updates
         required: false
+      WINDOWS_CODESIGN_CERT:
+        description: Certificate for signing Windows builds
+        required: false
+      WINDOWS_CODESIGN_PASSWORD:
+        description: Password for signing Windows builds
+        required: false
       CACHIX_AUTH_TOKEN:
         description: Private token for authenticating against Cachix cache
         required: false
@@ -40,6 +46,7 @@ jobs:
           - os: windows-2022
             name: "Windows-MinGW-w64"
             msystem: clang64
+            vcvars_arch: 'amd64_x86'
 
           - os: windows-2022
             name: "Windows-MSVC-Legacy"
@@ -61,7 +68,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.4.2'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -73,7 +80,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.4.2'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -83,7 +90,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.3.0'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -145,13 +152,13 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.8
+        uses: hendrikmuhs/ccache-action@v1.2.9
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.2.4
+        uses: actions/cache@v3.3.1
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
@@ -201,6 +208,8 @@ jobs:
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: 'windows'
            target: 'desktop'
@@ -216,6 +225,8 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: ${{ matrix.qt_host }}
            target: 'desktop'
@@ -225,7 +236,7 @@ jobs:
            cache: ${{ inputs.is_qt_cached }}
 
       - name: Install MSVC (Windows MSVC)
-        if: runner.os == 'Windows' && matrix.msystem == ''
+        if: runner.os == 'Windows'  # We want this for MinGW builds as well, as we need SignTool
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
@@ -376,6 +387,23 @@ jobs:
             Copy-Item D:/a/PollyMC/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
 
+      - name: Fetch codesign certificate (Windows)
+        if: runner.os == 'Windows'
+        shell: bash  # yes, we are not using MSYS2 or PowerShell here
+        run: |
+          echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
+
+      - name: Sign executable (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if (Get-Content ./codesign.pfx){
+            cd ${{ env.INSTALL_DIR }}
+            # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
+            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com pollymc.exe pollymc_filelink.exe
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
+
       - name: Package (Windows MinGW-w64, portable)
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
@@ -394,6 +422,15 @@ jobs:
         run: |
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
+
+      - name: Sign installer (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if (Get-Content ./codesign.pfx){
+            SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com PollyMC-Setup.exe
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
