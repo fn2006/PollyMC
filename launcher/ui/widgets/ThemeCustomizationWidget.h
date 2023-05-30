@@ -72,6 +72,7 @@ class ThemeCustomizationWidget : public QWidget {
         { "kitteh",     QObject::tr("Background Cat (from MultiMC)") }, 
         { "rory",       QObject::tr("Rory ID 11 (drawn by Ashtaka)") }, 
         { "rory-flat",  QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
-        { "teawie",     QObject::tr("Teawie (drawn by SympathyTea)") }
+        { "teawie",     QObject::tr("Teawie (drawn by SympathyTea)") },
+        { "polly",      QObject::tr("Polly the Parrot (drawn by anoraktrend)") }
     };
 };

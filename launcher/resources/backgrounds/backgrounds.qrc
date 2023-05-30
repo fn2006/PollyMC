@@ -1,9 +1,9 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/backgrounds">
-        <file alias="kitteh">Polly.png</file>
-        <file alias="kitteh-xmas">PollyChristmas.png</file>
-        <file alias="kitteh-bday">PollyParty.png</file>
+        <file alias="kitteh">kitteh.png</file>
+        <file alias="kitteh-xmas">kitteh-xmas.png</file>
+        <file alias="kitteh-bday">kitteh-bday.png</file>
         <file alias="kitteh-spooky">kitteh-spooky.png</file>
         <file alias="rory">rory.png</file>
         <file alias="rory-xmas">rory-xmas.png</file>
@@ -25,5 +25,8 @@
         <!-- https://commons.wikimedia.org/wiki/File:Teawie_Party.png -->
         <file alias="teawie-spooky">teawie-spooky.png</file>
         <!-- https://commons.wikimedia.org/wiki/File:Teawie_Halloween.png -->
+        <file alias="polly">polly.png</file>
+        <file alias="polly-xmas">polly-xmas.png</file>
+        <file alias="polly-bday">polly-bday.png</file>
     </qresource>
 </RCC>
