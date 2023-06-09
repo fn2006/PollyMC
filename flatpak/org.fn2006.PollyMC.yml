@@ -1,4 +1,4 @@
-id: org.prismlauncher.PrismLauncher
+id: org.fn2006.PollyMC
 runtime: org.kde.Platform
 runtime-version: "5.15-22.08"
 sdk: org.kde.Sdk
@@ -13,7 +13,7 @@ add-extensions:
     autodelete: false
     directory: utils/gamescope
 
-command: prismlauncher
+command: pollymc
 finish-args:
   - --share=ipc
   - --socket=x11
@@ -27,11 +27,11 @@ finish-args:
   - --filesystem=xdg-download:ro
 
 modules:
-  - name: prismlauncher
+  - name: pollymc
     buildsystem: cmake-ninja
     config-opts:
       - -DLauncher_BUILD_PLATFORM=flatpak
-      - -DCMAKE_BUILD_TYPE=Debug
+      - -DCMAKE_BUILD_TYPE=Release
       - -DLauncher_QT_VERSION_MAJOR=5
     build-options:
       env:
@@ -76,10 +76,10 @@ modules:
     build-commands:
       - mkdir -p /app/utils/gamescope
       - install -Dm755 prime-run /app/bin/prime-run
-      - mv /app/bin/prismlauncher /app/bin/prismrun
-      - install -Dm755 prismlauncher /app/bin/prismlauncher
+      - mv /app/bin/pollymc /app/bin/pollyrun
+      - install -Dm755 pollymc /app/bin/pollymc
     sources:
       - type: file
         path: ../flatpak/prime-run
       - type: file
-        path: ../flatpak/prismlauncher
+        path: ../flatpak/pollymc
