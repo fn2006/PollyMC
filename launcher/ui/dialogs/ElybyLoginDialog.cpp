@@ -43,7 +43,12 @@ void ElybyLoginDialog::accept()
 
     // Setup the login task and start it
     m_account = MinecraftAccount::createElyby(ui->userTextBox->text());
-    m_loginTask = m_account->loginElyby(ui->passTextBox->text());
+    if (ui->mfaTextBox->text().length() > 0) {
+        m_loginTask = m_account->loginElyby(ui->passTextBox->text() + ':' + ui->mfaTextBox->text());
+    }
+    else {
+        m_loginTask = m_account->loginElyby(ui->passTextBox->text());
+    }
     connect(m_loginTask.get(), &Task::failed, this, &ElybyLoginDialog::onTaskFailed);
     connect(m_loginTask.get(), &Task::succeeded, this, &ElybyLoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &ElybyLoginDialog::onTaskStatus);
@@ -55,6 +60,7 @@ void ElybyLoginDialog::setUserInputsEnabled(bool enable)
 {
     ui->userTextBox->setEnabled(enable);
     ui->passTextBox->setEnabled(enable);
+    ui->mfaTextBox->setEnabled(enable);
     ui->buttonBox->setEnabled(enable);
 }
 

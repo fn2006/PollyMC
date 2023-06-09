@@ -51,6 +51,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QLineEdit" name="mfaTextBox">
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+     <property name="placeholderText">
+      <string>2FA Code (Optional)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
       <number>24</number>

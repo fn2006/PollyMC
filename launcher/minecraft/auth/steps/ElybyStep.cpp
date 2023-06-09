@@ -46,7 +46,7 @@ void ElybyStep::onAuthFailed() {
     // NOTE: soft error in the first step means 'offline'
     if(state == AccountTaskState::STATE_FAILED_SOFT) {
         state = AccountTaskState::STATE_OFFLINE;
-        errorMessage = tr("Ely.by user authentication ended with a network error.");
+        errorMessage = tr("Ely.by user authentication ended with a network error.\nIf you are using 2FA make sure to enter your auth code.");
     }
     emit finished(state, errorMessage);
 }
