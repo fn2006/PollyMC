@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -107,6 +107,7 @@
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/ExportMrPackDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -199,7 +200,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
 
         auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
-        ui->actionAccountsButton->setMenu(ui->accountsMenu);
         accountMenuButton->setPopupMode(QToolButton::InstantPopup);
     }
 
@@ -397,6 +397,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // removing this looks stupid
     view->setFocus();
 
+    ui->actionExportInstance->setMenu(ui->exportInstanceMenu);
+
     retranslateUi();
 }
 
@@ -414,15 +416,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::retranslateUi()
 {
-    auto accounts = APPLICATION->accounts();
-    MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
-    if(defaultAccount) {
-        auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
-        ui->actionAccountsButton->setText(profileLabel);
-    }
-    else {
-        ui->actionAccountsButton->setText(tr("Accounts"));
-    }
 
     if (m_selectedInstance) {
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
@@ -431,6 +424,12 @@ void MainWindow::retranslateUi()
     }
 
     ui->retranslateUi(this);
+
+    MinecraftAccountPtr defaultAccount = APPLICATION->accounts()->defaultAccount();
+    if(defaultAccount) {
+        auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
+        ui->actionAccountsButton->setText(profileLabel);
+    }
 
     changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
     renameButton->setToolTip(ui->actionRenameInstance->toolTip());
@@ -673,6 +672,15 @@ void MainWindow::repopulateAccountsMenu()
 {
     ui->accountsMenu->clear();
 
+    // NOTE: this is done so the accounts button text is not set to the accounts menu title
+    QMenu *accountsButtonMenu = ui->actionAccountsButton->menu();
+    if (accountsButtonMenu) {
+        accountsButtonMenu->clear();
+    } else {
+        accountsButtonMenu = new QMenu(this);
+        ui->actionAccountsButton->setMenu(accountsButtonMenu);
+    }
+
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
 
@@ -686,6 +694,8 @@ void MainWindow::repopulateAccountsMenu()
             ui->actionAccountsButton->setText(profileLabel);
         }
     }
+
+    QActionGroup* accountsGroup = new QActionGroup(this);
 
     if (accounts->count() <= 0)
     {
@@ -702,6 +712,7 @@ void MainWindow::repopulateAccountsMenu()
             QAction *action = new QAction(profileLabel, this);
             action->setData(i);
             action->setCheckable(true);
+            action->setActionGroup(accountsGroup);
             if (defaultAccount == account)
             {
                 action->setChecked(true);
@@ -730,6 +741,7 @@ void MainWindow::repopulateAccountsMenu()
 
     ui->actionNoDefaultAccount->setData(-1);
     ui->actionNoDefaultAccount->setChecked(!defaultAccount);
+    ui->actionNoDefaultAccount->setActionGroup(accountsGroup);
 
     ui->accountsMenu->addAction(ui->actionNoDefaultAccount);
 
@@ -737,6 +749,8 @@ void MainWindow::repopulateAccountsMenu()
 
     ui->accountsMenu->addSeparator();
     ui->accountsMenu->addAction(ui->actionManageAccounts);
+
+    accountsButtonMenu->addActions(ui->accountsMenu->actions());
 }
 
 void MainWindow::updatesAllowedChanged(bool allowed)
@@ -1359,11 +1373,20 @@ void MainWindow::on_actionDeleteInstance_triggered()
     APPLICATION->instances()->deleteInstance(id);
 }
 
-void MainWindow::on_actionExportInstance_triggered()
+void MainWindow::on_actionExportInstanceZip_triggered()
 {
     if (m_selectedInstance)
     {
         ExportInstanceDialog dlg(m_selectedInstance, this);
+        dlg.exec();
+    }
+}
+
+void MainWindow::on_actionExportInstanceMrPack_triggered()
+{
+    if (m_selectedInstance)
+    {
+        ExportMrPackDialog dlg(m_selectedInstance, this);
         dlg.exec();
     }
 }
