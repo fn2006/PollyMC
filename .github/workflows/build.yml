@@ -1,7 +1,7 @@
 name: Build
 
-on:
-  workflow_call:
+on: 
+  workflow_dispatch:
     inputs:
       build_type:
         description: Type of build (Debug, Release, RelWithDebInfo, MinSizeRel)
@@ -11,19 +11,6 @@ on:
         description: Enable Qt caching or not
         type: string
         default: true
-    secrets:
-      SPARKLE_ED25519_KEY:
-        description: Private key for signing Sparkle updates
-        required: false
-      WINDOWS_CODESIGN_CERT:
-        description: Certificate for signing Windows builds
-        required: false
-      WINDOWS_CODESIGN_PASSWORD:
-        description: Password for signing Windows builds
-        required: false
-      CACHIX_AUTH_TOKEN:
-        description: Private token for authenticating against Cachix cache
-        required: false
 
 jobs:
   build:
