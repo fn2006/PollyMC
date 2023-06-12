@@ -1,16 +1,6 @@
 name: Build
 
-on: 
-  workflow_dispatch:
-    inputs:
-      build_type:
-        description: Type of build (Debug, Release, RelWithDebInfo, MinSizeRel)
-        type: string
-        default: Debug
-      is_qt_cached:
-        description: Enable Qt caching or not
-        type: string
-        default: true
+on: workflow_dispatch
 
 jobs:
   build:
