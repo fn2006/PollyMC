@@ -44,7 +44,7 @@ jobs:
           mv PollyMC-Linux-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux*/PollyMC.tar.gz PollyMC-Linux-${{ env.VERSION }}.tar.gz
           mv PollyMC-*.AppImage/PollyMC-*.AppImage PollyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-          mv PollyMC-*.flatpak/PollyMC-*.flatpak PollyMC-Linux-${{ env.VERSION }}-x86_64.flatpak
+          mv ${{ github.workspace }}/PollyMC-*.flatpak PollyMC-Linux-${{ env.VERSION }}-x86_64.flatpak
           mv PollyMC-macOS-Legacy*/PollyMC.tar.gz PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
           mv PollyMC-macOS*/PollyMC.tar.gz PollyMC-macOS-${{ env.VERSION }}.tar.gz
 
