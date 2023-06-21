@@ -47,7 +47,7 @@ jobs:
           mv PollyMC-macOS-Legacy*/PollyMC.tar.gz PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
           mv PollyMC-macOS*/PollyMC.tar.gz PollyMC-macOS-${{ env.VERSION }}.tar.gz
 
-          tar -czf PollyMC-${{ env.VERSION }}.tar.gz PollyMC-${{ env.VERSION }}
+          tar --exclude='.git' -czf PollyMC-${{ env.VERSION }}.tar.gz PollyMC-${{ env.VERSION }}
 
           for d in PollyMC-Windows-MSVC*; do
             cd "${d}" || continue
