@@ -430,6 +430,9 @@ QStringList MinecraftInstance::extraArguments()
     }
     auto agents = m_components->getProfile()->getAgents();
     for (auto agent : agents) {
+        if (MANAGED_AGENTS.find(agent->library()->artifactPrefix().toStdString()) != MANAGED_AGENTS.end()) {
+            continue;
+        }
         QStringList jar, temp1, temp2, temp3;
         agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:" + jar[0] + (agent->argument().isEmpty() ? "" : "=" + agent->argument()));
@@ -525,6 +528,39 @@ QString MinecraftInstance::getLauncher()
         return "legacy";
 
     return "standard";
+}
+
+QStringList MinecraftInstance::processAuthArgs(AuthSessionPtr session) const
+{
+    QStringList args;
+    if(session->uses_custom_api_servers)
+    {
+        args << "-Dminecraft.api.env=custom";
+        args << "-Dminecraft.api.auth.host=" + session->auth_server_url;
+        args << "-Dminecraft.api.account.host=" + session->account_server_url;
+        args << "-Dminecraft.api.session.host=" + session->session_server_url;
+        args << "-Dminecraft.api.services.host=" + session->services_server_url;
+        auto agents = m_components->getProfile()->getAgents();
+        for (auto agent : agents)
+        {
+            if (agent->library()->artifactPrefix() == "moe.yushi:authlibinjector")
+            {
+                QStringList jar, temp1, temp2, temp3;
+                agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
+                QString argument{agent->argument()};
+                if (argument.isEmpty()) {
+                    argument = session->authlib_injector_url;
+                }
+                args << "-javaagent:"+jar[0]+(argument.isEmpty() ? "" : "="+argument);
+                if (session->authlib_injector_metadata != "") {
+                    args << "-Dauthlibinjector.yggdrasil.prefetched="+session->authlib_injector_metadata;
+                }
+            }
+            break;
+        }
+
+    }
+    return args;
 }
 
 QMap<QString, QString> MinecraftInstance::getVariables()

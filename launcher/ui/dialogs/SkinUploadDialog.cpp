@@ -101,12 +101,12 @@ void SkinUploadDialog::on_buttonBox_accepted()
         } else if (ui->alexBtn->isChecked()) {
             model = SkinUpload::ALEX;
         }
-        skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_acct->accessToken(), FS::read(fileName), model)));
+        skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_account, FS::read(fileName), model)));
     }
 
     auto selectedCape = ui->capeCombo->currentData().toString();
-    if (selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
-        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, m_acct->accessToken(), selectedCape)));
+    if (selectedCape != m_account->accountData()->minecraftProfile.currentCape) {
+        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, m_account, selectedCape)));
     }
     if (prog.execWithTask(&skinUpload) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to upload skin!"), QMessageBox::Warning)->exec();
@@ -128,12 +128,12 @@ void SkinUploadDialog::on_skinBrowseBtn_clicked()
     ui->skinPathTextBox->setText(cooked_path);
 }
 
-SkinUploadDialog::SkinUploadDialog(MinecraftAccountPtr acct, QWidget* parent) : QDialog(parent), m_acct(acct), ui(new Ui::SkinUploadDialog)
+SkinUploadDialog::SkinUploadDialog(MinecraftAccountPtr account, QWidget* parent) : QDialog(parent), m_account(account), ui(new Ui::SkinUploadDialog)
 {
     ui->setupUi(this);
 
     // FIXME: add a model for this, download/refresh the capes on demand
-    auto& accountData = *acct->accountData();
+    auto& accountData = *account->accountData();
     int index = 0;
     ui->capeCombo->addItem(tr("No Cape"), QVariant());
     auto currentCape = accountData.minecraftProfile.currentCape;

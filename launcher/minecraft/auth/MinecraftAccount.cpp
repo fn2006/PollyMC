@@ -50,13 +50,14 @@
 
 #include <QPainter>
 
+#include "flows/AuthlibInjector.h"
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
 #include "flows/Offline.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
-    data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    data.internalId = QUuid::createUuid().toString(QUuid::Id128);
 }
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV2(const QJsonObject& json)
@@ -86,6 +87,23 @@ MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString& username
     return account;
 }
 
+MinecraftAccountPtr MinecraftAccount::createFromUsernameAuthlibInjector(const QString& username, const QString& authlibInjectorUrl)
+{
+    auto account = makeShared<MinecraftAccount>();
+    account->data.type = AccountType::AuthlibInjector;
+    account->data.yggdrasilToken.extra["userName"] = username;
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
+    account->data.minecraftEntitlement.ownsMinecraft = true;
+    account->data.minecraftEntitlement.canPlayMinecraft = true;
+
+    account->data.authlibInjectorUrl = authlibInjectorUrl;
+    account->data.customAuthServerUrl = authlibInjectorUrl + "/authserver";
+    account->data.customAccountServerUrl = authlibInjectorUrl + "/api";
+    account->data.customSessionServerUrl = authlibInjectorUrl + "/sessionserver";
+    account->data.customServicesServerUrl = authlibInjectorUrl + "/minecraftservices";
+    return account;
+}
+
 MinecraftAccountPtr MinecraftAccount::createBlankMSA()
 {
     MinecraftAccountPtr account(new MinecraftAccount());
@@ -101,10 +119,10 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
-    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
     return account;
@@ -150,6 +168,18 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password)
     return m_currentTask;
 }
 
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginAuthlibInjector(QString password)
+{
+    Q_ASSERT(m_currentTask.get() == nullptr);
+
+    m_currentTask.reset(new AuthlibInjectorLogin(&data, password));
+    connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
+    connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
+    connect(m_currentTask.get(), &Task::aborted, this, [this] { authFailed(tr("Aborted")); });
+    emit activityChanged(true);
+    return m_currentTask;
+}
+
 shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA()
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
@@ -184,6 +214,8 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh()
         m_currentTask.reset(new MSASilent(&data));
     } else if (data.type == AccountType::Offline) {
         m_currentTask.reset(new OfflineRefresh(&data));
+    } else if (data.type == AccountType::AuthlibInjector) {
+        m_currentTask.reset(new AuthlibInjectorRefresh(&data));
     } else {
         m_currentTask.reset(new MojangRefresh(&data));
     }
@@ -314,6 +346,15 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     } else {
         session->session = "-";
     }
+
+    // API URLs
+    session->authlib_injector_url = data.authlibInjectorUrl;
+    session->auth_server_url = data.authServerUrl();
+    session->account_server_url = data.accountServerUrl();
+    session->session_server_url = data.sessionServerUrl();
+    session->services_server_url = data.servicesServerUrl();
+    session->uses_custom_api_servers = data.usesCustomApiServers();
+    session->authlib_injector_metadata = data.authlibInjectorMetadata;
 }
 
 void MinecraftAccount::decrementUses()

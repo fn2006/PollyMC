@@ -40,6 +40,8 @@
 
 #include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 
 class InstanceWindow;
 class LaunchController : public Task {

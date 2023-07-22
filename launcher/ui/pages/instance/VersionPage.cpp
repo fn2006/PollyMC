@@ -381,7 +381,12 @@ void VersionPage::on_actionChange_version_triggered()
         return;
     }
     auto uid = list->uid();
-
+    // FIXME: this is a horrible HACK. Get version filtering information from the actual metadata...
+    // unsure if the above comment still applies
+    if (uid == "moe.yushi.authlibinjector") {
+        on_actionInstall_AuthlibInjector_triggered();
+        return;
+    }
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
     if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed") {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
@@ -418,6 +423,38 @@ void VersionPage::on_actionDownload_All_triggered()
     tDialog.execWithTask(updateTask.get());
     updateButtons();
     m_container->refreshContainer();
+}
+
+void VersionPage::openInstallAuthlibInjector()
+{
+    auto vlist = APPLICATION->metadataIndex()->get("moe.yushi.authlibinjector");
+    if(!vlist)
+    {
+        return;
+    }
+    VersionSelectDialog vselect(vlist.get(), tr("Select authlib-injector version"), this);
+    vselect.setEmptyString(tr("No authlib-injector versions are currently available."));
+    vselect.setEmptyErrorString(tr("Couldn't load or download the authlib-injector version lists!"));
+
+    auto currentVersion = m_profile->getComponentVersion("moe.yushi.authlibinjector");
+    if(!currentVersion.isEmpty())
+    {
+        vselect.setCurrentVersion(currentVersion);
+    }
+
+    if (vselect.exec() && vselect.selectedVersion())
+    {
+        auto vsn = vselect.selectedVersion();
+        m_profile->setComponentVersion("moe.yushi.authlibinjector", vsn->descriptor());
+        m_profile->resolve(Net::Mode::Online);
+        preselect(m_profile->rowCount(QModelIndex())-1);
+        m_container->refreshContainer();
+    }
+}
+
+void VersionPage::on_actionInstall_AuthlibInjector_triggered()
+{
+    openInstallAuthlibInjector();
 }
 
 void VersionPage::on_actionInstall_Loader_triggered()

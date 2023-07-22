@@ -103,6 +103,8 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("ManagedPackVersionName", "");
 
     m_settings->registerSetting("Profiler", "");
+
+    m_settings->registerSetting("SuggestAuthlibInjector", true);
 }
 
 QString BaseInstance::getPreLaunchCommand()

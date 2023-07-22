@@ -65,9 +65,12 @@ class VersionPage : public QMainWindow, public BasePage {
 
     void openedImpl() override;
     void closedImpl() override;
+    void openInstallAuthlibInjector();
+
 
    private slots:
     void on_actionChange_version_triggered();
+    void on_actionInstall_AuthlibInjector_triggered();
     void on_actionInstall_Loader_triggered();
     void on_actionAdd_Empty_triggered();
     void on_actionReload_triggered();

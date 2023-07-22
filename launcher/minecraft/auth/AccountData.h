@@ -71,7 +71,7 @@ struct MinecraftProfile {
     Katabasis::Validity validity = Katabasis::Validity::None;
 };
 
-enum class AccountType { MSA, Mojang, Offline };
+enum class AccountType { MSA, Mojang, AuthlibInjector, Offline };
 
 enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored, Expired, Gone };
 
@@ -79,6 +79,12 @@ struct AccountData {
     QJsonObject saveState() const;
     bool resumeStateFromV2(QJsonObject data);
     bool resumeStateFromV3(QJsonObject data);
+
+    bool usesCustomApiServers() const;
+    QString authServerUrl() const;
+    QString accountServerUrl() const;
+    QString sessionServerUrl() const;
+    QString servicesServerUrl() const;
 
     //! userName for Mojang accounts, gamertag for MSA
     QString accountDisplayString() const;
@@ -103,6 +109,13 @@ struct AccountData {
     AccountType type = AccountType::MSA;
     bool legacy = false;
     bool canMigrateToMSA = false;
+
+    QString customAuthServerUrl;
+    QString customAccountServerUrl;
+    QString customSessionServerUrl;
+    QString customServicesServerUrl;
+    QString authlibInjectorUrl;
+    QString authlibInjectorMetadata;
 
     QString msaClientID;
     Katabasis::Token msaToken;

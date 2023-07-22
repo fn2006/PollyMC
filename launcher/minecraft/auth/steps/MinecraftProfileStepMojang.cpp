@@ -2,6 +2,7 @@
 
 #include <QNetworkRequest>
 
+#include "BuildConfig.h"
 #include "Logging.h"
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
@@ -24,7 +25,7 @@ void MinecraftProfileStepMojang::perform()
     }
 
     // use session server instead of profile due to profile endpoint being locked for locked Mojang accounts
-    QUrl url = QUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + m_data->minecraftProfile.id);
+    QUrl url = QUrl(m_data->sessionServerUrl() + "/session/minecraft/profile/" + m_data->minecraftProfile.id);
     QNetworkRequest req = QNetworkRequest(url);
     AuthRequest* request = new AuthRequest(this);
     connect(request, &AuthRequest::finished, this, &MinecraftProfileStepMojang::onRequestDone);

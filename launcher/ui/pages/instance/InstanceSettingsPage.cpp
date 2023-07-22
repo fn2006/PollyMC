@@ -262,6 +262,8 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("DisableQuiltBeacon");
     }
 
+    m_settings->set("SuggestAuthlibInjector", ui->suggestAuthlibInjector->isChecked());
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -369,6 +371,8 @@ void InstanceSettingsPage::loadSettings()
     // Mod loader specific settings
     ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
     ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
+
+    ui->suggestAuthlibInjector->setChecked(m_settings->get("SuggestAuthlibInjector").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

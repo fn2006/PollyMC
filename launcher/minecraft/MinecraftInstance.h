@@ -35,12 +35,15 @@
  */
 
 #pragma once
+#include <unordered_set>
 #include <java/JavaVersion.h>
 #include <QDir>
 #include <QProcess>
 #include "BaseInstance.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
 #include "minecraft/mod/Mod.h"
+
+const std::unordered_set<std::string> MANAGED_AGENTS = {"moe.yushi:authlibinjector"};
 
 class ModFolderModel;
 class ResourceFolderModel;
@@ -152,6 +155,8 @@ class MinecraftInstance : public BaseInstance {
     virtual QStringList getNativeJars();
     // FIXME: remove
     virtual QString getMainClass() const;
+
+    virtual QStringList processAuthArgs(AuthSessionPtr account) const;
 
     // FIXME: remove
     virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) const;

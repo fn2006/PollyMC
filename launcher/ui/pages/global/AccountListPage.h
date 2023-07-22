@@ -71,6 +71,7 @@ class AccountListPage : public QMainWindow, public BasePage {
 
    public slots:
     void on_actionAddMojang_triggered();
+    void on_actionAddAuthlibInjector_triggered();
     void on_actionAddMicrosoft_triggered();
     void on_actionAddOffline_triggered();
     void on_actionRemove_triggered();
