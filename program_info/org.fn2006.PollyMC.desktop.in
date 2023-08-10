@@ -1,4 +1,3 @@
-#!/usr/bin/env xdg-open
 [Desktop Entry]
 Version=1.0
 Name=PollyMC
@@ -8,6 +7,7 @@ Terminal=false
 Exec=@Launcher_APP_BINARY_NAME@
 StartupNotify=true
 Icon=org.fn2006.PollyMC
-Categories=Game;
-Keywords=game;minecraft;launcher;mc;
-StartupWMClass=PollyMC
+Categories=Game;ActionGame;AdventureGame;Simulation;
+Keywords=game;minecraft;mc;
+StartupWMClass=PrismLauncher
+MimeType=application/zip;application/x-modrinth-modpack+zip

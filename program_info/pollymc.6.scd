@@ -26,6 +26,9 @@ Here are the current features of PollyMC.
 *-l, --launch*=INSTANCE_ID
 	Launch the instance specified by INSTANCE_ID.
 
+*--show*=INSTANCE_ID
+	Show the configuration window of the instance specified by INSTANCE_ID.
+
 *--alive*
 	Write a small 'live.check' file after PollyMC starts.
 
@@ -37,6 +40,24 @@ Here are the current features of PollyMC.
 
 *-a, --profile*=PROFILE
 	Use the account specified by PROFILE (only valid in combination with --launch).
+
+# ENVIRONMENT
+
+The behavior of the launcher can be customized by the following environment
+variables, besides other common Qt variables:
+
+*QT_LOGGING_RULES*
+	Specifies which logging categories are shown in the logs. One can
+	enable/disable multiple categories by separating them with a semicolon (;).
+
+	The specific syntax, and alternatives to this setting, can be found at
+	https://doc.qt.io/qt-6/qloggingcategory.html#configuring-categories.
+
+*QT_MESSAGE_PATTERN*
+	Specifies the format in which the console output will be shown.
+
+	Available options, as well as syntax, can be viewed at
+	https://doc.qt.io/qt-6/qtglobal.html#qSetMessagePattern.
 
 # EXIT STATUS
 
@@ -56,6 +77,7 @@ GitHub: https://github.com/fn2006/PollyMC
 
 # AUTHORS
 
+Prism Launcher Contributors
+
 PollyMC Contributors
 
-PolyMC Contributors

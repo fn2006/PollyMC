@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
   <id>org.fn2006.PollyMC</id>
-  <provides>
-    <id>org.fn2006.PollyMC</id>
-  </provides>
   <launchable type="desktop-id">org.fn2006.PollyMC.desktop</launchable>
   <name>PollyMC</name>
-  <developer_name>fn2006C</developer_name>
+  <developer_name>fn2006</developer_name>
   <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
-  <url type="homepage">https://github.com/fn2006/PollyMC/</url>
-  <url type="help">https://polymc.org/wiki/</url>
+  <url type="homepage">https://github.com/fn2006/PollyMC</url>
+  <url type="bugtracker">https://github.com/fn2006/PollyMC/issues</url>
   <description>
     <p>PollyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
     <p>Features:</p>
     <ul>
       <li>Easily install game modifications, such as Fabric, Forge and Quilt</li>
-      <li>Control your java settings</li>
+      <li>Easily install and update modpacks from the Launcher</li>
+      <li>Control your Java settings, and enable Mangohud or Gamemode with a toggle</li>
       <li>Manage worlds and resource packs from the launcher</li>
-      <li>See logs and other details easily</li>
+      <li>See logs and other details easily through a dashboard</li>
       <li>Kill Minecraft in case of a crash/freeze</li>
-      <li>Isolate minecraft instances to keep everything clean</li>
+      <li>Isolate Minecraft instances to keep everything clean</li>
       <li>Install and update mods directly from the launcher</li>
+      <li>Customize the launcher with themes, and more</li>
+      <li>And cat :3</li>
     </ul>
   </description>
   <releases>
