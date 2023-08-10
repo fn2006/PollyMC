@@ -3,10 +3,23 @@
 <img src="./program_info/pollymc-header.svg#gh-dark-mode-only" alt="PollyMC logo" width="60%"/>
 </p>
 
-PollyMC is a **fork** of Prism Launcher that adds support for Ely.by accounts and allows you to play offline mode without an account
+PollyMC is a **fork** of Prism Launcher that adds support for Ely.by accounts and allows you to play offline mode without an account.
 
-PollyMC is not endorsed by or affiliated with the Prism Launcher project.
-If you have any problems open an issue here, do not bug the Prism Launcher maintainers.
+PollyMC is **not** endorsed by or affiliated with PolyMC or Prism launcher.
+
+<h1>Having a problem with the launcher?</h1>
+
+You **will not** open an issue in the Prism Launcher repo.
+
+You **will not** open an issue in the PolyMC repo.
+
+You **will not** ask about PollyMC in the Prism Launcher discord.
+
+You **will not** ask about PollyMC in the PolyMC discord.
+
+You **will** open an issue [here](https://github.com/fn2006/PollyMC/issues).
+
+You **will** start a discussion [here](https://github.com/fn2006/PollyMC/discussions).
 
 <h1>Installation</h1>
 
