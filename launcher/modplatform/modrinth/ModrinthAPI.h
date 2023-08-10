@@ -12,27 +12,23 @@
 
 class ModrinthAPI : public NetworkResourceAPI {
    public:
-    auto currentVersion(QString hash,
-                        QString hash_format,
-                        QByteArray* response) -> Task::Ptr;
+    auto currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
-    auto currentVersions(const QStringList& hashes,
-                         QString hash_format,
-                         QByteArray* response) -> Task::Ptr;
+    auto currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
     auto latestVersion(QString hash,
                        QString hash_format,
                        std::optional<std::list<Version>> mcVersions,
                        std::optional<ModLoaderTypes> loaders,
-                       QByteArray* response) -> Task::Ptr;
+                       std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
     auto latestVersions(const QStringList& hashes,
                         QString hash_format,
-                       std::optional<std::list<Version>> mcVersions,
-                       std::optional<ModLoaderTypes> loaders,
-                        QByteArray* response) -> Task::Ptr;
+                        std::optional<std::list<Version>> mcVersions,
+                        std::optional<ModLoaderTypes> loaders,
+                        std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
-    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
    public:
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
@@ -42,7 +38,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
     {
         QStringList l;
-        for (auto loader : {Forge, Fabric, Quilt}) {
+        for (auto loader : { Forge, Fabric, Quilt, LiteLoader }) {
             if (types & loader) {
                 l << getModLoaderString(loader);
             }
@@ -97,7 +93,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     {
         if (args.loaders.has_value()) {
             if (!validateModLoaders(args.loaders.value())) {
-                qWarning() << "Modrinth only have Forge and Fabric-compatible mods!";
+                qWarning() << "Modrinth - or our interface - does not support any the provided mod loaders!";
                 return {};
             }
         }
@@ -146,9 +142,6 @@ class ModrinthAPI : public NetworkResourceAPI {
         return s.isEmpty() ? QString() : s;
     }
 
-    inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool
-    {
-        return loaders & (Forge | Fabric | Quilt);
-    }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (Forge | Fabric | Quilt | LiteLoader); }
 
 };
