@@ -21,6 +21,7 @@
 #include "modplatform/modpacksch/FTBPackManifest.h"
 #include "net/NetJob.h"
 #include <QIcon>
+#include <memory>
 
 namespace Ftb {
 
@@ -34,8 +35,7 @@ struct Logo {
 typedef QMap<QString, Logo> LogoMap;
 typedef std::function<void(QString)> LogoCallback;
 
-class ListModel : public QAbstractListModel
-{
+class ListModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
@@ -77,7 +77,7 @@ private:
     NetJob::Ptr jobPtr;
     int currentPack;
     QList<int> remainingPacks;
-    QByteArray response;
+    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 };
 
 }

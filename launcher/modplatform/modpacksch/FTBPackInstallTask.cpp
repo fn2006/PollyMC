@@ -90,7 +90,7 @@ void PackInstallTask::executeTask()
     auto netJob = makeShared<NetJob>("ModpacksCH::VersionFetch", APPLICATION->network());
 
     auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1/%2").arg(m_pack.id).arg(version.id);
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &m_response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), m_response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onManifestDownloadSucceeded);
     QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onManifestDownloadFailed);
@@ -108,11 +108,11 @@ void PackInstallTask::onManifestDownloadSucceeded()
     m_net_job.reset();
 
     QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset
                    << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qWarning() << *m_response;
         return;
     }
 
