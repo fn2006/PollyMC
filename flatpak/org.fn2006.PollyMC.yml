@@ -25,6 +25,8 @@ finish-args:
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
     # Mod drag&drop
   - --filesystem=xdg-download:ro
+  	# Use same directory as regular builds
+  - --filesystem=xdg-data/PollyMC:create
 
 cleanup:
   - /lib/libGLU*
