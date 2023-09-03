@@ -82,7 +82,7 @@ QString getCreditsHtml()
     stream << "<br />\n";
 
     //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
-    stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
+    stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg("Prism Launcher") << "</h3>\n";
     stream << QString("<p>Sefa Eyeoglu (Scrumplex) %1</p>\n").arg(getWebsite("https://scrumplex.net"));
     stream << QString("<p>d-513 %1</p>\n").arg(getGitHub("d-513"));
     stream << QString("<p>txtsd %1</p>\n").arg(getWebsite("https://ihavea.quest"));

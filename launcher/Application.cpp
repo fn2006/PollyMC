@@ -980,6 +980,20 @@ void Application::performMainStartupAction()
             return;
         }
     }
+    {
+        bool shouldFetch = m_settings->get("FlameKeyShouldBeFetchedOnStartup").toBool();
+        if (!BuildConfig.FLAME_API_KEY_API_URL.isEmpty() && shouldFetch && !(capabilities() & Capability::SupportsFlame))
+        {
+            // don't ask, just fetch
+            QString apiKey = GuiUtil::fetchFlameKey();
+            if (!apiKey.isEmpty())
+            {
+                m_settings->set("FlameKeyOverride", apiKey);
+                updateCapabilities();
+            }
+            m_settings->set("FlameKeyShouldBeFetchedOnStartup", false);
+        }
+    }
     if (!m_mainWindow) {
         // normal main window
         showMainWindow(false);

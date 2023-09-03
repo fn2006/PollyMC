@@ -190,7 +190,6 @@ void AccountListPage::on_actionAddElyby_triggered()
         }
     }
 }
-}
 
 void AccountListPage::on_actionRemove_triggered()
 {
