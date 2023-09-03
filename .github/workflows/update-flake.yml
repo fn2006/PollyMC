@@ -12,17 +12,19 @@ permissions:
 
 jobs:
   update-flake:
-    if: github.repository == 'PrismLauncher/PrismLauncher'
+    if: github.repository == 'fn2006/PollyMC'
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v22
 
-      - uses: DeterminateSystems/update-flake-lock@v19
+      - uses: DeterminateSystems/update-flake-lock@v20
         with:
           commit-msg: "chore(nix): update lockfile"
           pr-title: "chore(nix): update lockfile"
           pr-labels: |
             Linux
+            packaging
             simple change
+            changelog:omit

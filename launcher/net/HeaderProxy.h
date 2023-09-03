@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,32 +14,36 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
 #pragma once
 
-#include <QDialog>
-#include "BaseInstance.h"
-#include "FastFileIconProvider.h"
-#include "FileIgnoreProxy.h"
+#include <QDebug>
+#include <QNetworkRequest>
 
-namespace Ui {
-class ExportMrPackDialog;
-}
+namespace Net {
 
-class ExportMrPackDialog : public QDialog {
-    Q_OBJECT
+struct HeaderPair {
+    QByteArray headerName;
+    QByteArray headerValue;
+};
+
+class HeaderProxy {
+   public:
+    HeaderProxy() {}
+    virtual ~HeaderProxy() {}
 
    public:
-    explicit ExportMrPackDialog(InstancePtr instance, QWidget* parent = nullptr);
-    ~ExportMrPackDialog();
+    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;
 
-    void done(int result) override;
-    void validate();
-
-   private:
-    const InstancePtr instance;
-    Ui::ExportMrPackDialog* ui;
-    FileIgnoreProxy* proxy;
-    FastFileIconProvider icons;
+   public:
+    void writeHeaders(QNetworkRequest& request)
+    {
+        for (auto header : headers(request)) {
+            request.setRawHeader(header.headerName, header.headerValue);
+        }
+    }
 };
+
+}  // namespace Net

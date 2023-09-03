@@ -10,4 +10,4 @@ Icon=org.fn2006.PollyMC
 Categories=Game;ActionGame;AdventureGame;Simulation;
 Keywords=game;minecraft;mc;
 StartupWMClass=PrismLauncher
-MimeType=application/zip;application/x-modrinth-modpack+zip
+MimeType=application/zip;application/x-modrinth-modpack+zip;x-scheme-handler/curseforge;
