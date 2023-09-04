@@ -54,7 +54,7 @@ void Yggdrasil::sendRequest(QUrl endpoint, QByteArray content)
 
 void Yggdrasil::executeTask() {}
 
-void Yggdrasil::refresh(QString baseUrl)
+void Yggdrasil::refresh()
 {
     start();
     /*
@@ -84,13 +84,13 @@ void Yggdrasil::refresh(QString baseUrl)
     req.insert("requestUser", false);
     QJsonDocument doc(req);
 
-    QUrl reqUrl(baseUrl + "refresh");
+    QUrl reqUrl("https://authserver.mojang.com/refresh");
     QByteArray requestData = doc.toJson();
 
     sendRequest(reqUrl, requestData);
 }
 
-void Yggdrasil::login(QString password, QString baseUrl)
+void Yggdrasil::login(QString password)
 {
     start();
     /*
@@ -130,7 +130,7 @@ void Yggdrasil::login(QString password, QString baseUrl)
 
     QJsonDocument doc(req);
 
-    QUrl reqUrl(baseUrl + "authenticate");
+    QUrl reqUrl("https://authserver.mojang.com/authenticate");
     QNetworkRequest netRequest(reqUrl);
     QByteArray requestData = doc.toJson();
 

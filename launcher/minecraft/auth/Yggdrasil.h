@@ -36,8 +36,8 @@ class Yggdrasil : public AccountTask {
     explicit Yggdrasil(AccountData* data, QObject* parent = 0);
     virtual ~Yggdrasil() = default;
 
-    void refresh(QString baseUrl);
-    void login(QString password, QString baseUrl);
+    void refresh();
+    void login(QString password);
 
     struct Error {
         QString m_errorMessageShort;

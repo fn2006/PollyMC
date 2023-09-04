@@ -353,8 +353,6 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
         type = AccountType::Mojang;
     } else if (typeS == "Offline") {
         type = AccountType::Offline;
-    } else if (typeS == "Elyby") {
-        type = AccountType::Elyby;
     } else {
         qWarning() << "Failed to parse account data: type is not recognized.";
         return false;
@@ -415,9 +413,6 @@ QJsonObject AccountData::saveState() const
     } else if (type == AccountType::Offline) {
         output["type"] = "Offline";
     }
-    else if (type == AccountType::Elyby) {
-        output["type"] = "Elyby";
-    }
 
     tokenToJSONV3(output, yggdrasilToken, "ygg");
     profileToJSONV3(output, minecraftProfile, "profile");
@@ -440,7 +435,7 @@ QString AccountData::accessToken() const
 
 QString AccountData::clientToken() const
 {
-    if (type != AccountType::Mojang && type != AccountType::Elyby) {
+    if (type != AccountType::Mojang) {
         return QString();
     }
     return yggdrasilToken.extra["clientToken"].toString();
@@ -448,7 +443,7 @@ QString AccountData::clientToken() const
 
 void AccountData::setClientToken(QString clientToken)
 {
-    if (type != AccountType::Mojang && type != AccountType::Elyby) {
+    if (type != AccountType::Mojang) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = clientToken;
@@ -464,7 +459,7 @@ void AccountData::generateClientTokenIfMissing()
 
 void AccountData::invalidateClientToken()
 {
-    if (type != AccountType::Mojang && type != AccountType::Elyby) {
+    if (type != AccountType::Mojang) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{-}]"));
@@ -488,9 +483,6 @@ QString AccountData::accountDisplayString() const
 {
     switch (type) {
         case AccountType::Mojang: {
-            return userName();
-        }
-        case AccountType::Elyby: {
             return userName();
         }
         case AccountType::Offline: {

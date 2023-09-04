@@ -55,7 +55,6 @@
    <addaction name="actionAddMicrosoft"/>
    <addaction name="actionAddMojang"/>
    <addaction name="actionAddOffline"/>
-   <addaction name="actionAddElyby"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
@@ -108,11 +107,6 @@
   <action name="actionAddOffline">
    <property name="text">
     <string>Add &amp;Offline</string>
-   </property>
-  </action>
-  <action name="actionAddElyby">
-   <property name="text">
-    <string>Add &amp;Ely.by</string>
    </property>
   </action>
   <action name="actionRefresh">

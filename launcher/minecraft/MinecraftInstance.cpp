@@ -461,12 +461,6 @@ QStringList MinecraftInstance::extraArguments()
             list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
     }
 
-    // TODO: figure out how polymc's javaagent system works and use it instead of this hack
-    if (m_injector) {
-        list.append("-javaagent:"+m_injector->javaArg);
-        list.append("-Dauthlibinjector.noShowServerName");
-    }
-
     return list;
 }
 
@@ -1026,10 +1020,6 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     if (session->status != AuthSession::PlayableOffline) {
         if (!session->demo) {
             process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        }
-        // authlib patch
-        if (session->user_type == "elyby") {
-            process->appendStep(makeShared<InjectAuthlib>(pptr, &m_injector));
         }
         process->appendStep(makeShared<Update>(pptr, Net::Mode::Online));
     } else {

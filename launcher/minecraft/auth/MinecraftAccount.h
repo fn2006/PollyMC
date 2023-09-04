@@ -91,8 +91,6 @@ class MinecraftAccount : public QObject, public Usable {
 
     static MinecraftAccountPtr createOffline(const QString& username);
 
-    static MinecraftAccountPtr createElyby(const QString& username);
-
     static MinecraftAccountPtr loadFromJsonV2(const QJsonObject& json);
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject& json);
 
@@ -111,8 +109,6 @@ class MinecraftAccount : public QObject, public Usable {
     shared_qobject_ptr<AccountTask> loginMSA();
 
     shared_qobject_ptr<AccountTask> loginOffline();
-
-    shared_qobject_ptr<AccountTask> loginElyby(QString password);
 
     shared_qobject_ptr<AccountTask> refresh();
 
@@ -137,11 +133,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     bool isMSA() const { return data.type == AccountType::MSA; }
 
-    bool isMojang() const { return data.type == AccountType::Mojang; }
-
     bool isOffline() const { return data.type == AccountType::Offline; }
-
-    bool isElyby() const { return data.type == AccountType::Elyby; }
 
     bool ownsMinecraft() const { return data.minecraftEntitlement.ownsMinecraft; }
 
@@ -161,9 +153,6 @@ class MinecraftAccount : public QObject, public Usable {
             } break;
             case AccountType::Offline: {
                 return "offline";
-            } break;
-            case AccountType::Elyby: {
-                return "elyby";
             } break;
             default: {
                 return "unknown";

@@ -71,7 +71,7 @@ struct MinecraftProfile {
     Katabasis::Validity validity = Katabasis::Validity::None;
 };
 
-enum class AccountType { MSA, Mojang, Offline, Elyby };
+enum class AccountType { MSA, Mojang, Offline };
 
 enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored, Expired, Gone };
 
