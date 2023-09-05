@@ -47,6 +47,7 @@
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 
+#include <QCheckBox>
 #include <QHostAddress>
 #include <QHostInfo>
 #include <QInputDialog>
@@ -54,7 +55,6 @@
 #include <QList>
 #include <QPushButton>
 #include <QStringList>
-#include <QCheckBox>
 
 #include "BuildConfig.h"
 #include "JavaCommon.h"
@@ -143,43 +143,44 @@ void LaunchController::login()
 
     if (m_accountToUse->usesCustomApiServers()) {
         MinecraftInstancePtr inst = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
-        if (inst->getPackProfile()->getComponentVersion("moe.yushi.authlibinjector") == "") {
+        const auto suggestAuthlibInjector = m_instance->settings()->get("SuggestAuthlibInjector").toBool();
+        const auto& authlibInjectorVersion = inst->getPackProfile()->getComponentVersion("moe.yushi.authlibinjector");
+        if (suggestAuthlibInjector && authlibInjectorVersion == "") {
             // Account uses custom API servers, but authlib-injector is missing
             // Prompt user to install authlib-injector on the instance before launching
-            QMessageBox msgBox{m_parentWidget};
+            QMessageBox msgBox{ m_parentWidget };
             msgBox.setWindowTitle(tr("Missing authlib-injector"));
             msgBox.setText(tr("authlib-injector is not installed."));
-            msgBox.setInformativeText(tr(
-                "You are logging in using an account that uses custom API servers, but authlib-injector "
-                "is not installed on this instance.\n\n"
-                "Would you like to install authlib-injector now?"
-            ));
+            msgBox.setInformativeText(
+                tr("You are logging in using an account that uses custom API servers, but authlib-injector "
+                   "is not installed on this instance.\n\n"
+                   "Would you like to install authlib-injector now?"));
             msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ignore | QMessageBox::Yes);
             msgBox.setDefaultButton(QMessageBox::Yes);
             msgBox.setModal(true);
 
             QCheckBox* checkBox = new QCheckBox("Don't ask again", m_parentWidget);
-            checkBox->setChecked(!m_instance->settings()->get("SuggestAuthlibInjector").toBool());
+            checkBox->setChecked(!suggestAuthlibInjector);
 
             msgBox.setCheckBox(checkBox);
-            const auto & result = msgBox.exec();
+            const auto& result = msgBox.exec();
 
             m_instance->settings()->set("SuggestAuthlibInjector", !checkBox->isChecked());
 
             switch (result) {
-            case QMessageBox::Ignore:
-                break;
-            case QMessageBox::Cancel:
-                return;
-            case QMessageBox::Yes:
-                if (result == QMessageBox::Yes) {
-                    const auto & window = APPLICATION->showInstanceWindow(m_instance, "version");
-                    const auto & page = dynamic_cast<VersionPage *>(window->getPage("version"));
-                    if (page != nullptr) {
-                        page->openInstallAuthlibInjector();
-                    }
+                case QMessageBox::Ignore:
+                    break;
+                case QMessageBox::Cancel:
                     return;
-                }
+                case QMessageBox::Yes:
+                    if (result == QMessageBox::Yes) {
+                        const auto& window = APPLICATION->showInstanceWindow(m_instance, "version");
+                        const auto& page = dynamic_cast<VersionPage*>(window->getPage("version"));
+                        if (page != nullptr) {
+                            page->openInstallAuthlibInjector();
+                        }
+                        return;
+                    }
             }
         }
     }
