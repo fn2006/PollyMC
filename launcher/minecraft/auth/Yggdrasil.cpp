@@ -25,8 +25,8 @@
 
 #include <QDebug>
 
-#include "BuildConfig.h"
 #include "Application.h"
+#include "BuildConfig.h"
 
 Yggdrasil::Yggdrasil(AccountData* data, QObject* parent) : AccountTask(data, parent)
 {

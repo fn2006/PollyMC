@@ -124,17 +124,17 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     // override/replace existing account with the same profileId
     auto profileId = account->profileId();
     if (profileId.size() && account->isMojangOrMSA()) {
-        auto iter = std::find_if(m_accounts.constBegin(), m_accounts.constEnd(), [&](const MinecraftAccountPtr & existing) {
+        auto iter = std::find_if(m_accounts.constBegin(), m_accounts.constEnd(), [&](const MinecraftAccountPtr& existing) {
             return existing->profileId() == profileId && existing->isMojangOrMSA();
         });
 
-        if(iter != m_accounts.constEnd()) {
+        if (iter != m_accounts.constEnd()) {
             qDebug() << "Replacing old account with a new one with the same profile ID!";
 
             MinecraftAccountPtr existingAccount = *iter;
             const auto existingAccountIndex = std::distance(m_accounts.constBegin(), iter);
             m_accounts[existingAccountIndex] = account;
-            if(m_defaultAccount == existingAccount) {
+            if (m_defaultAccount == existingAccount) {
                 m_defaultAccount = account;
             }
             // disconnect notifications for changes in the account being replaced

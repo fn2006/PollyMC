@@ -38,10 +38,10 @@
 #include <tools/BaseProfiler.h>
 #include <QObject>
 
-#include "minecraft/auth/MinecraftAccount.h"
-#include "minecraft/launch/MinecraftServerTarget.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/auth/MinecraftAccount.h"
+#include "minecraft/launch/MinecraftServerTarget.h"
 
 class InstanceWindow;
 class LaunchController : public Task {
