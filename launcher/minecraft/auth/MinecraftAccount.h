@@ -147,6 +147,8 @@ class MinecraftAccount : public QObject, public Usable {
     bool canMigrate() const { return data.canMigrateToMSA; }
 
     bool isMojangOrMSA() const { return data.type == AccountType::Mojang || data.type == AccountType::MSA; }
+    
+    bool isMojang() const { return data.type == AccountType::Mojang; }
 
     bool isMSA() const { return data.type == AccountType::MSA; }
 
