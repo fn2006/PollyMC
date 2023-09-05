@@ -1,9 +1,9 @@
 #pragma once
 
+#include <minecraft/auth/MinecraftAccount.h>
 #include <QFile>
 #include <QtNetwork/QtNetwork>
 #include "tasks/Task.h"
-#include <minecraft/auth/MinecraftAccount.h>
 
 typedef shared_qobject_ptr<class SkinDelete> SkinDeletePtr;
 

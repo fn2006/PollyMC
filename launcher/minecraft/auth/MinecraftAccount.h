@@ -86,10 +86,7 @@ class MinecraftAccount : public QObject, public Usable {
     explicit MinecraftAccount(QObject* parent = 0);
 
     static MinecraftAccountPtr createFromUsername(const QString& username);
-    static MinecraftAccountPtr createFromUsernameAuthlibInjector(
-        const QString& username,
-        const QString& authlibInjectorUrl
-    );
+    static MinecraftAccountPtr createFromUsernameAuthlibInjector(const QString& username, const QString& authlibInjectorUrl);
 
     static MinecraftAccountPtr createBlankMSA();
 
@@ -123,29 +120,17 @@ class MinecraftAccount : public QObject, public Usable {
    public: /* queries */
     QString internalId() const { return data.internalId; }
 
-    QString authlibInjectorUrl() const {
-        return data.authlibInjectorUrl;
-    }
+    QString authlibInjectorUrl() const { return data.authlibInjectorUrl; }
 
-    QString authServerUrl() const {
-        return data.authServerUrl();
-    }
+    QString authServerUrl() const { return data.authServerUrl(); }
 
-    QString accountServerUrl() const {
-        return data.accountServerUrl();
-    }
+    QString accountServerUrl() const { return data.accountServerUrl(); }
 
-    QString sessionServerUrl() const {
-        return data.sessionServerUrl();
-    }
+    QString sessionServerUrl() const { return data.sessionServerUrl(); }
 
-    QString servicesServerUrl() const {
-        return data.servicesServerUrl();
-    }
+    QString servicesServerUrl() const { return data.servicesServerUrl(); }
 
-    bool usesCustomApiServers() const {
-        return data.usesCustomApiServers();
-    }
+    bool usesCustomApiServers() const { return data.usesCustomApiServers(); }
 
     QString accountDisplayString() const { return data.accountDisplayString(); }
 
@@ -175,7 +160,7 @@ class MinecraftAccount : public QObject, public Usable {
     {
         switch (data.type) {
             case AccountType::Mojang: {
-                if(data.legacy) {
+                if (data.legacy) {
                     return "Legacy";
                 }
                 return "Mojang";

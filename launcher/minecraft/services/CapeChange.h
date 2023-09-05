@@ -1,11 +1,11 @@
 #pragma once
 
+#include <minecraft/auth/MinecraftAccount.h>
 #include <QFile>
 #include <QtNetwork/QtNetwork>
 #include <memory>
 #include "QObjectPtr.h"
 #include "tasks/Task.h"
-#include <minecraft/auth/MinecraftAccount.h>
 
 class CapeChange : public Task {
     Q_OBJECT

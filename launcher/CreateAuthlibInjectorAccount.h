@@ -30,8 +30,8 @@ class CreateAuthlibInjectorAccount : public NetAction {
         return CreateAuthlibInjectorAccountPtr(new CreateAuthlibInjectorAccount(url, account, username));
     }
     MinecraftAccountPtr getAccount();
-    
-    void init() override {};
+
+    void init() override{};
 
    protected slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override {}
