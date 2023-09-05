@@ -155,19 +155,6 @@ void AccountListPage::on_actionAddMojang_triggered()
 
 void AccountListPage::on_actionAddAuthlibInjector_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
-        QMessageBox::warning(
-            this,
-            tr("Error"),
-            tr(
-                "You must add a Microsoft or Mojang account that owns Minecraft before you can add an account on a custom authentication server."
-                "<br><br>"
-                "If you have lost your account you can contact Microsoft for support."
-            )
-        );
-        return;
-    }
-
     MinecraftAccountPtr account = AuthlibInjectorLoginDialog::newAccount(
         this,
         tr(
