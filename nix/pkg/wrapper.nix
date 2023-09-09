@@ -80,7 +80,7 @@ in
         ]
         ++ additionalPrograms;
     in
-      ["--prefix pollymc_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"]
+      ["--prefix POLLYMC_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"]
       ++ lib.optionals stdenv.isLinux [
         "--set LD_LIBRARY_PATH /run/opengl-driver/lib:${lib.makeLibraryPath runtimeLibs}"
         # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
