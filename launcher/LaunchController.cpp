@@ -37,6 +37,7 @@
 #include "LaunchController.h"
 #include "Application.h"
 #include "minecraft/auth/AccountList.h"
+#include "settings/MissingAuthlibInjectorBehavior.h"
 #include "ui/pages/instance/VersionPage.h"
 
 #include "ui/InstanceWindow.h"
@@ -59,6 +60,8 @@
 #include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "launch/steps/TextPrint.h"
+#include "meta/Index.h"
+#include "meta/VersionList.h"
 #include "minecraft/auth/AccountTask.h"
 #include "tasks/Task.h"
 
@@ -143,44 +146,85 @@ void LaunchController::login()
 
     if (m_accountToUse->usesCustomApiServers()) {
         MinecraftInstancePtr inst = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
-        const auto suggestAuthlibInjector = m_instance->settings()->get("SuggestAuthlibInjector").toBool();
+
         const auto& authlibInjectorVersion = inst->getPackProfile()->getComponentVersion("moe.yushi.authlibinjector");
-        if (suggestAuthlibInjector && authlibInjectorVersion == "") {
+
+        if (authlibInjectorVersion == "") {
             // Account uses custom API servers, but authlib-injector is missing
-            // Prompt user to install authlib-injector on the instance before launching
-            QMessageBox msgBox{ m_parentWidget };
-            msgBox.setWindowTitle(tr("Missing authlib-injector"));
-            msgBox.setText(tr("authlib-injector is not installed."));
-            msgBox.setInformativeText(
-                tr("You are logging in using an account that uses custom API servers, but authlib-injector "
-                   "is not installed on this instance.\n\n"
-                   "Would you like to install authlib-injector now?"));
-            msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ignore | QMessageBox::Yes);
-            msgBox.setDefaultButton(QMessageBox::Yes);
-            msgBox.setModal(true);
 
-            QCheckBox* checkBox = new QCheckBox("Don't ask again", m_parentWidget);
-            checkBox->setChecked(!suggestAuthlibInjector);
+            int globalMissingBehavior = APPLICATION->settings()->get("MissingAuthlibInjectorBehavior").toInt();
+            int missingBehavior = globalMissingBehavior;
 
-            msgBox.setCheckBox(checkBox);
-            const auto& result = msgBox.exec();
+            if (globalMissingBehavior == MissingAuthlibInjectorBehavior::Ask) {
+                QMessageBox msgBox{ m_parentWidget };
+                msgBox.setWindowTitle(tr("Missing authlib-injector"));
+                msgBox.setText(tr("authlib-injector is not installed."));
+                msgBox.setInformativeText(
+                    tr("You are logging in using an account that uses custom API servers, but authlib-injector "
+                       "is not installed on this instance.\n\n"
+                       "Would you like to install authlib-injector now?"));
+                msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ignore | QMessageBox::Yes);
+                msgBox.setDefaultButton(QMessageBox::Yes);
+                msgBox.setModal(true);
 
-            m_instance->settings()->set("SuggestAuthlibInjector", !checkBox->isChecked());
+                QCheckBox* checkBox = new QCheckBox("Always do the same for all instances without asking", m_parentWidget);
+                checkBox->setChecked(false);
 
-            switch (result) {
-                case QMessageBox::Ignore:
-                    break;
-                case QMessageBox::Cancel:
-                    return;
-                case QMessageBox::Yes:
-                    if (result == QMessageBox::Yes) {
-                        const auto& window = APPLICATION->showInstanceWindow(m_instance, "version");
-                        const auto& page = dynamic_cast<VersionPage*>(window->getPage("version"));
-                        if (page != nullptr) {
-                            page->openInstallAuthlibInjector();
-                        }
+                msgBox.setCheckBox(checkBox);
+                const auto& result = msgBox.exec();
+
+                switch (result) {
+                    case QMessageBox::Cancel: {
+                        return;
+                    } break;
+                    case QMessageBox::Ignore: {
+                        missingBehavior = MissingAuthlibInjectorBehavior::Ignore;
+                    } break;
+                    case QMessageBox::Yes: {
+                        missingBehavior = MissingAuthlibInjectorBehavior::Install;
+                    } break;
+                }
+
+                if (checkBox->isChecked()) {
+                    globalMissingBehavior = missingBehavior;
+                    APPLICATION->settings()->set("MissingAuthlibInjectorBehavior", globalMissingBehavior);
+                }
+            } else {
+                missingBehavior = globalMissingBehavior;
+            }
+
+            if (missingBehavior == MissingAuthlibInjectorBehavior::Install) {
+                // Install recommended authlib-injector version
+                try {
+                    auto vlist = APPLICATION->metadataIndex()->get("moe.yushi.authlibinjector");
+                    if (!vlist) {
+                        throw Exception(tr("No authlib-injector versions available."));
+                    }
+
+                    ProgressDialog loadDialog(m_parentWidget);
+                    loadDialog.setSkipButton(true, tr("Abort"));
+                    auto loadTask = vlist->getLoadTask();
+                    loadDialog.execWithTask(loadTask.get());
+
+                    if (!loadTask->wasSuccessful()) {
+                        throw Exception(tr("Failed to load authlib-injector versions."));
+                    }
+
+                    auto recommended = vlist->getRecommended();
+                    if (recommended == nullptr) {
+                        throw Exception(tr("No authlib-injector versions available."));
+                    }
+
+                    inst->getPackProfile()->setComponentVersion("moe.yushi.authlibinjector", recommended->descriptor());
+                } catch (const Exception& e) {
+                    const auto& message = e.cause() + "\n\n" + tr("Launch anyway?");
+                    auto result = QMessageBox::question(m_parentWidget, tr("Failed to install authlib-injector"), message);
+
+                    if (result == QMessageBox::No) {
+                        emitAborted();
                         return;
                     }
+                }
             }
         }
     }
