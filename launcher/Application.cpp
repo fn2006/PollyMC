@@ -115,6 +115,7 @@
 #include "tools/MCEditTool.h"
 
 #include "settings/INISettingsObject.h"
+#include "settings/MissingAuthlibInjectorBehavior.h"
 #include "settings/Setting.h"
 
 #include "meta/Index.h"
@@ -601,6 +602,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
 
+        // Missing authlib-injector behavior
+        m_settings->registerSetting("MissingAuthlibInjectorBehavior", MissingAuthlibInjectorBehavior::Ask);
+
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");
 
@@ -982,12 +986,10 @@ void Application::performMainStartupAction()
     }
     {
         bool shouldFetch = m_settings->get("FlameKeyShouldBeFetchedOnStartup").toBool();
-        if (!BuildConfig.FLAME_API_KEY_API_URL.isEmpty() && shouldFetch && !(capabilities() & Capability::SupportsFlame))
-        {
+        if (!BuildConfig.FLAME_API_KEY_API_URL.isEmpty() && shouldFetch && !(capabilities() & Capability::SupportsFlame)) {
             // don't ask, just fetch
             QString apiKey = GuiUtil::fetchFlameKey();
-            if (!apiKey.isEmpty())
-            {
+            if (!apiKey.isEmpty()) {
                 m_settings->set("FlameKeyOverride", apiKey);
                 updateCapabilities();
             }

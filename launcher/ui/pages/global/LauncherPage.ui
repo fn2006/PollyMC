@@ -190,6 +190,22 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="authlibInjectorBox">
+         <property name="title">
+          <string>Missing authlib-injector behavior</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QComboBox" name="missingAIComboBox">
+            <property name="toolTip">
+             <string>What to do when using an authlib-injector account with an instance that does not have authlib-injector installed</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

@@ -37,6 +37,8 @@
  *      limitations under the License.
  */
 
+#include "Application.h"
+
 #include <Version.h>
 #include <QCryptographicHash>
 #include <QDebug>

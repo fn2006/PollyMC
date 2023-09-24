@@ -430,6 +430,7 @@ set(SETTINGS_SOURCES
     settings/Setting.h
     settings/SettingsObject.cpp
     settings/SettingsObject.h
+    settings/MissingAuthlibInjectorBehavior.h
 )
 
 set(JAVA_SOURCES
