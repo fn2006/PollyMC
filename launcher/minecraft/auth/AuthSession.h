@@ -33,6 +33,8 @@ struct AuthSession {
     bool uses_custom_api_servers = false;
     QString authlib_injector_metadata;
 
+    // account ID
+    QString account_id;
     // client token
     QString client_token;
     // account user name
