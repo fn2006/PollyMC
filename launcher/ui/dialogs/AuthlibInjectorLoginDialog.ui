@@ -31,12 +31,15 @@
      <property name="textInteractionFlags">
       <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
      </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
     <widget class="QLineEdit" name="userTextBox">
      <property name="placeholderText">
-       <string>Email/username</string>
+      <string>Email/username</string>
      </property>
     </widget>
    </item>

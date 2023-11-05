@@ -44,9 +44,9 @@
 
 #include "net/NetJob.h"
 
+#include "ui/dialogs/AuthlibInjectorLoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/LoginDialog.h"
-#include "ui/dialogs/AuthlibInjectorLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -156,16 +156,14 @@ void AccountListPage::on_actionAddMojang_triggered()
 void AccountListPage::on_actionAddAuthlibInjector_triggered()
 {
     MinecraftAccountPtr account = AuthlibInjectorLoginDialog::newAccount(
-        this,
-        tr(
-            "Please enter your username (sometimes an email address), password, and the URLs of your API servers."
-            "<br><br>"
-            "<b>Caution!</b> Your username and password will be sent to the authentication server you specify!"
-        )
-    );
+        this, tr("Please enter your username (sometimes an email address), password, and the URL of your API server."
+                 "<br>"
+                 "See <a href=\"https://github.com/fn2006/PollyMC/wiki/Alternative-Auth-Servers\">this page</a> on the PollyMC wiki for a "
+                 "list of common API servers.</p>"
+                 "<br><br>"
+                 "<b>Caution!</b> Your username and password will be sent to the authentication server you specify!"));
 
-    if (account)
-    {
+    if (account) {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
             m_accounts->setDefaultAccount(account);
