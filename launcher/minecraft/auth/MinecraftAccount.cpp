@@ -328,6 +328,8 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
         }
     }
 
+    // account ID
+    session->account_id = internalId();
     // the user name. you have to have an user name
     // FIXME: not with MSA
     session->username = data.userName();
