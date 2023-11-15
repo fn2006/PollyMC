@@ -292,6 +292,9 @@ bool MinecraftAccount::shouldRefresh() const
     if (isInUse()) {
         return false;
     }
+    if (data.type == AccountType::AuthlibInjector && data.authlibInjectorMetadata == "") {
+        return true;
+    }
     switch (data.validity_) {
         case Katabasis::Validity::Certain: {
             break;
