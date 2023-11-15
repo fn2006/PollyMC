@@ -3,10 +3,9 @@ name: Build Application and Make Release
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
-
   build_release:
     name: Build Release
     uses: ./.github/workflows/build.yml
@@ -18,6 +17,8 @@ jobs:
       WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
       WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
       CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
   create_release:
     needs: build_release
@@ -26,10 +27,10 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          submodules: 'true'
-          path: 'PollyMC-source'
+          submodules: "true"
+          path: "PollyMC-source"
       - name: Download artifacts
         uses: actions/download-artifact@v3
       - name: Grab and store version
@@ -41,8 +42,8 @@ jobs:
           mv ${{ github.workspace }}/PollyMC-source PollyMC-${{ env.VERSION }}
           mv PollyMC-Linux-Qt6-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
-          mv PollyMC-Linux-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
-          mv PollyMC-Linux*/PollyMC.tar.gz PollyMC-Linux-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux-Qt5-Portable*/PollyMC-Qt5-portable.tar.gz PollyMC-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux-Qt5*/PollyMC.tar.gz PollyMC-Linux-Qt5-${{ env.VERSION }}.tar.gz
           mv PollyMC-*.AppImage/PollyMC-*.AppImage PollyMC-Linux-x86_64.AppImage
           mv PollyMC-*.AppImage.zsync/PollyMC-*.AppImage.zsync PollyMC-Linux-x86_64.AppImage.zsync
           mv PollyMC*.flatpak/PollyMC*.flatpak PollyMC-Linux-${{ env.VERSION }}-x86_64.flatpak
@@ -87,8 +88,8 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            PollyMC-Linux-${{ env.VERSION }}.tar.gz
-            PollyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-Qt5-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-x86_64.AppImage
             PollyMC-Linux-x86_64.AppImage.zsync
             PollyMC-Linux-${{ env.VERSION }}-x86_64.flatpak
@@ -97,9 +98,6 @@ jobs:
             PollyMC-Windows-MinGW-w64-${{ env.VERSION }}.zip
             PollyMC-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
             PollyMC-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
-            PollyMC-Windows-MSVC-Legacy-${{ env.VERSION }}.zip
-            PollyMC-Windows-MSVC-Legacy-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
             PollyMC-Windows-MSVC-arm64-${{ env.VERSION }}.zip
             PollyMC-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
             PollyMC-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
@@ -109,4 +107,3 @@ jobs:
             PollyMC-macOS-${{ env.VERSION }}.tar.gz
             PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
             PollyMC-${{ env.VERSION }}.tar.gz
-

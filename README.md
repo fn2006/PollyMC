@@ -49,4 +49,3 @@ There are builds for MacOS in the [releases section](https://github.com/fn2006/P
 <h2></h2>
 
 To build the launcher yourself, follow [the instructions on the Prism Launcher website](https://prismlauncher.org/wiki/development/build-instructions) but clone this repo instead.
-

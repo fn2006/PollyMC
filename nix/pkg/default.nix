@@ -58,6 +58,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
     dontWrapQtApps = true;
 
     meta = with lib; {
+      mainProgram = "pollymc";
       homepage = "https://github.com/fn2006/PollyMC/";
       description = "A free, open source launcher for Minecraft";
       longDescription = ''

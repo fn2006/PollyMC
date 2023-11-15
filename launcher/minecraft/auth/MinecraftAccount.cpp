@@ -60,15 +60,6 @@ MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
     data.internalId = QUuid::createUuid().toString(QUuid::Id128);
 }
 
-MinecraftAccountPtr MinecraftAccount::loadFromJsonV2(const QJsonObject& json)
-{
-    MinecraftAccountPtr account(new MinecraftAccount());
-    if (account->data.resumeStateFromV2(json)) {
-        return account;
-    }
-    return nullptr;
-}
-
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
 {
     MinecraftAccountPtr account(new MinecraftAccount());
@@ -335,8 +326,6 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     session->username = data.userName();
     // volatile auth token
     session->access_token = data.accessToken();
-    // the semi-permanent client token
-    session->client_token = data.clientToken();
     // profile name
     session->player_name = data.profileName();
     // profile ID

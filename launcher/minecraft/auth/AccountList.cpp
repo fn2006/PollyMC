@@ -54,7 +54,7 @@
 
 #include <chrono>
 
-enum AccountListVersion { MojangOnly = 2, MojangMSA = 3 };
+enum AccountListVersion { MojangMSA = 3 };
 
 AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)
 {
@@ -379,8 +379,6 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                     return tr("Type");
                 case StatusColumn:
                     return tr("Status");
-                case MigrationColumn:
-                    return tr("Can Migrate?");
                 default:
                     return QVariant();
             }
@@ -392,11 +390,9 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case NameColumn:
                     return tr("User name of the account.");
                 case TypeColumn:
-                    return tr("Type of the account - Mojang or MSA.");
+                    return tr("Type of the account (MSA or Offline)");
                 case StatusColumn:
                     return tr("Current status of the account.");
-                case MigrationColumn:
-                    return tr("Can this account migrate to a Microsoft account?");
                 default:
                     return QVariant();
             }
@@ -486,9 +482,6 @@ bool AccountList::loadList()
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
     switch (listVersion) {
-        case AccountListVersion::MojangOnly: {
-            return loadV2(root);
-        } break;
         case AccountListVersion::MojangMSA: {
             return loadV3(root);
         } break;
@@ -500,33 +493,6 @@ bool AccountList::loadList()
             return false;
         }
     }
-}
-
-bool AccountList::loadV2(QJsonObject& root)
-{
-    beginResetModel();
-    auto defaultUserName = root.value("activeAccount").toString("");
-    QJsonArray accounts = root.value("accounts").toArray();
-    for (QJsonValue accountVal : accounts) {
-        QJsonObject accountObj = accountVal.toObject();
-        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV2(accountObj);
-        if (account.get() != nullptr) {
-            auto profileId = account->profileId();
-            if (!profileId.size()) {
-                continue;
-            }
-            connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
-            connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
-            m_accounts.append(account);
-            if (defaultUserName.size() && account->mojangUserName() == defaultUserName) {
-                m_defaultAccount = account;
-            }
-        } else {
-            qWarning() << "Failed to load an account.";
-        }
-    }
-    endResetModel();
-    return true;
 }
 
 bool AccountList::loadV3(QJsonObject& root)
