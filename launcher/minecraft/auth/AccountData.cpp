@@ -376,6 +376,7 @@ QJsonObject AccountData::saveState() const
         if (canMigrateToMSA) {
             output["canMigrateToMSA"] = true;
         }
+        output["type"] = "Mojang";
     } else if (type == AccountType::AuthlibInjector) {
         output["type"] = "AuthlibInjector";
         output["customAuthServerUrl"] = customAuthServerUrl;
