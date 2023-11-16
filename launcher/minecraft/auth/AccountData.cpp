@@ -287,12 +287,17 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
         return false;
     }
     auto typeS = typeV.toString();
+    bool needsElyByMigration = false;
     if (typeS == "MSA") {
         type = AccountType::MSA;
     } else if (typeS == "Mojang") {
         type = AccountType::Mojang;
     } else if (typeS == "AuthlibInjector") {
         type = AccountType::AuthlibInjector;
+    } else if (typeS == "Elyby") {
+        // Migrate legacy Ely.by accounts to authlib-injector accounts
+        type = AccountType::AuthlibInjector;
+        needsElyByMigration = true;
     } else if (typeS == "Offline") {
         type = AccountType::Offline;
     } else {
@@ -306,12 +311,21 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
     }
 
     if (type == AccountType::AuthlibInjector) {
-        customAuthServerUrl = data.value("customAuthServerUrl").toString();
-        customAccountServerUrl = data.value("customAccountServerUrl").toString();
-        customSessionServerUrl = data.value("customSessionServerUrl").toString();
-        customServicesServerUrl = data.value("customServicesServerUrl").toString();
-        authlibInjectorUrl = data.value("authlibInjectorUrl").toString();
-        authlibInjectorMetadata = data.value("authlibInjectorMetadata").toString();
+        if (needsElyByMigration) {
+            customAuthServerUrl = "https://authserver.ely.by/api/authlib-injector/authserver";
+            customAccountServerUrl = "https://authserver.ely.by/api/authlib-injector/api";
+            customSessionServerUrl = "https://authserver.ely.by/api/authlib-injector/sessionserver";
+            customServicesServerUrl = "https://authserver.ely.by/api/authlib-injector/minecraftservices";
+            authlibInjectorUrl = "https://authserver.ely.by/api/authlib-injector";
+            authlibInjectorMetadata = "";
+        } else {
+            customAuthServerUrl = data.value("customAuthServerUrl").toString();
+            customAccountServerUrl = data.value("customAccountServerUrl").toString();
+            customSessionServerUrl = data.value("customSessionServerUrl").toString();
+            customServicesServerUrl = data.value("customServicesServerUrl").toString();
+            authlibInjectorUrl = data.value("authlibInjectorUrl").toString();
+            authlibInjectorMetadata = data.value("authlibInjectorMetadata").toString();
+        }
     }
 
     if (type == AccountType::MSA) {
