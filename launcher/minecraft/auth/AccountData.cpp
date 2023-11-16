@@ -369,6 +369,13 @@ QJsonObject AccountData::saveState() const
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     } else if (type == AccountType::Offline) {
         output["type"] = "Offline";
+    } else if (type == AccountType::Mojang) {
+        if (legacy) {
+            output["legacy"] = true;
+        }
+        if (canMigrateToMSA) {
+            output["canMigrateToMSA"] = true;
+        }
     } else if (type == AccountType::AuthlibInjector) {
         output["type"] = "AuthlibInjector";
         output["customAuthServerUrl"] = customAuthServerUrl;
