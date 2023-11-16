@@ -57,7 +57,7 @@ PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDi
     priv = new PrismExternalUpdater::Private();
     priv->appDir = QDir(appDir);
     priv->dataDir = QDir(dataDir);
-    auto settings_file = priv->dataDir.absoluteFilePath("prismlauncher_update.cfg");
+    auto settings_file = priv->dataDir.absoluteFilePath("pollymc_update.cfg");
     priv->settings = std::make_unique<QSettings>(settings_file, QSettings::Format::IniFormat);
     priv->allowBeta = priv->settings->value("allow_beta", false).toBool();
     priv->autoCheck = priv->settings->value("auto_check", false).toBool();
