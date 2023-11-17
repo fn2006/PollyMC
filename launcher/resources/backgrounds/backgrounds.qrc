@@ -28,5 +28,6 @@
         <file alias="polly">polly.png</file>
         <file alias="polly-xmas">polly-xmas.png</file>
         <file alias="polly-bday">polly-bday.png</file>
+        <file alias="polly-spooky">polly.png</file>
     </qresource>
 </RCC>
