@@ -93,9 +93,8 @@ void LaunchController::decideAccount()
     if (accounts->count() <= 0) {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in. "
-                                                     "Would you like to open the account manager to add an account now?"),
+                                                  tr("In order to play Minecraft, you must pick your username or log in to an account "
+                                                     "Would you like to open the account manager to do this now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
 
