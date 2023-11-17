@@ -73,6 +73,7 @@ QString getCreditsHtml()
     //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
     stream << QString("<p>fn2006 %1</p>\n").arg(getGitHub("fn2006"));
+    stream << QString("<p>Evan Goode %1</p>\n").arg(getGitHub("evan-goode"));
     stream << "<br />\n";
 
     //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Contributors"
