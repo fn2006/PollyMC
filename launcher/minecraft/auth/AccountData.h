@@ -77,7 +77,6 @@ enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored
 
 struct AccountData {
     QJsonObject saveState() const;
-    bool resumeStateFromV2(QJsonObject data);
     bool resumeStateFromV3(QJsonObject data);
 
     bool usesCustomApiServers() const;

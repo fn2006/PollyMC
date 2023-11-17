@@ -279,67 +279,6 @@ bool entitlementFromJSONV3(const QJsonObject& parent, MinecraftEntitlement& out)
 
 }  // namespace
 
-bool AccountData::resumeStateFromV2(QJsonObject data)
-{
-    // The JSON object must at least have a username for it to be valid.
-    if (!data.value("username").isString()) {
-        qCritical() << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
-        return false;
-    }
-
-    QString userName = data.value("username").toString("");
-    QString clientToken = data.value("clientToken").toString("");
-    QString accessToken = data.value("accessToken").toString("");
-
-    QJsonArray profileArray = data.value("profiles").toArray();
-    if (profileArray.size() < 1) {
-        qCritical() << "Can't load Mojang account with username \"" << userName << "\". No profiles found.";
-        return false;
-    }
-
-    struct AccountProfile {
-        QString id;
-        QString name;
-        bool legacy;
-    };
-
-    QList<AccountProfile> profiles;
-    int currentProfileIndex = 0;
-    int index = -1;
-    QString currentProfile = data.value("activeProfile").toString("");
-    for (QJsonValue profileVal : profileArray) {
-        index++;
-        QJsonObject profileObject = profileVal.toObject();
-        QString id = profileObject.value("id").toString("");
-        QString name = profileObject.value("name").toString("");
-        bool legacy_ = profileObject.value("legacy").toBool(false);
-        if (id.isEmpty() || name.isEmpty()) {
-            qWarning() << "Unable to load a profile" << name << "because it was missing an ID or a name.";
-            continue;
-        }
-        if (id == currentProfile) {
-            currentProfileIndex = index;
-        }
-        profiles.append({ id, name, legacy_ });
-    }
-    auto& profile = profiles[currentProfileIndex];
-
-    type = AccountType::Mojang;
-    legacy = profile.legacy;
-
-    minecraftProfile.id = profile.id;
-    minecraftProfile.name = profile.name;
-    minecraftProfile.validity = Katabasis::Validity::Assumed;
-
-    yggdrasilToken.token = accessToken;
-    yggdrasilToken.extra["clientToken"] = clientToken;
-    yggdrasilToken.extra["userName"] = userName;
-    yggdrasilToken.validity = Katabasis::Validity::Assumed;
-
-    validity_ = minecraftProfile.validity;
-    return true;
-}
-
 bool AccountData::resumeStateFromV3(QJsonObject data)
 {
     auto typeV = data.value("type");
@@ -421,15 +360,7 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
 QJsonObject AccountData::saveState() const
 {
     QJsonObject output;
-    if (type == AccountType::Mojang) {
-        output["type"] = "Mojang";
-        if (legacy) {
-            output["legacy"] = true;
-        }
-        if (canMigrateToMSA) {
-            output["canMigrateToMSA"] = true;
-        }
-    } else if (type == AccountType::MSA) {
+    if (type == AccountType::MSA) {
         output["type"] = "MSA";
         output["msa-client-id"] = msaClientID;
         tokenToJSONV3(output, msaToken, "msa");
@@ -438,6 +369,14 @@ QJsonObject AccountData::saveState() const
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     } else if (type == AccountType::Offline) {
         output["type"] = "Offline";
+    } else if (type == AccountType::Mojang) {
+        if (legacy) {
+            output["legacy"] = true;
+        }
+        if (canMigrateToMSA) {
+            output["canMigrateToMSA"] = true;
+        }
+        output["type"] = "Mojang";
     } else if (type == AccountType::AuthlibInjector) {
         output["type"] = "AuthlibInjector";
         output["customAuthServerUrl"] = customAuthServerUrl;

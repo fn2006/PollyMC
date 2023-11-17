@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -89,6 +89,9 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
             return;
         case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
+            return;
+        case 3:
+            APPLICATION->ShowGlobalSettings(this, "environment-variables");
             return;
         default:
             APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
@@ -199,6 +202,14 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("PostExitCommand");
     }
 
+    // Environment Variables
+    auto env = ui->environmentVariables->override();
+    m_settings->set("OverrideEnv", env);
+    if (env)
+        m_settings->set("Env", ui->environmentVariables->value());
+    else
+        m_settings->reset("Env");
+
     // Workarounds
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
     m_settings->set("OverrideNativeWorkarounds", workarounds);
@@ -254,12 +265,12 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
-    bool overrideModLoaderSettings = ui->modLoaderSettingsGroupBox->isChecked();
-    m_settings->set("OverrideModLoaderSettings", overrideModLoaderSettings);
-    if (overrideModLoaderSettings) {
-        m_settings->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
+    bool overrideLegacySettings = ui->legacySettingsGroupBox->isChecked();
+    m_settings->set("OverrideLegacySettings", overrideLegacySettings);
+    if (overrideLegacySettings) {
+        m_settings->set("OnlineFixes", ui->onlineFixes->isChecked());
     } else {
-        m_settings->reset("DisableQuiltBeacon");
+        m_settings->reset("OnlineFixes");
     }
 
     // FIXME: This should probably be called by a signal instead
@@ -318,6 +329,9 @@ void InstanceSettingsPage::loadSettings()
     ui->customCommands->initialize(true, m_settings->get("OverrideCommands").toBool(), m_settings->get("PreLaunchCommand").toString(),
                                    m_settings->get("WrapperCommand").toString(), m_settings->get("PostExitCommand").toString());
 
+    // Environment variables
+    ui->environmentVariables->initialize(true, m_settings->get("OverrideEnv").toBool(), m_settings->get("Env").toMap());
+
     // Workarounds
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
     ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
@@ -366,9 +380,8 @@ void InstanceSettingsPage::loadSettings()
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
 
-    // Mod loader specific settings
-    ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
-    ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
+    ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
+    ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
@@ -485,6 +498,7 @@ void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
     ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
+    ui->environmentVariables->retranslate();
 }
 
 void InstanceSettingsPage::updateThresholds()

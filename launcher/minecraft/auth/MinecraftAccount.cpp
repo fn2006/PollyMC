@@ -60,15 +60,6 @@ MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
     data.internalId = QUuid::createUuid().toString(QUuid::Id128);
 }
 
-MinecraftAccountPtr MinecraftAccount::loadFromJsonV2(const QJsonObject& json)
-{
-    MinecraftAccountPtr account(new MinecraftAccount());
-    if (account->data.resumeStateFromV2(json)) {
-        return account;
-    }
-    return nullptr;
-}
-
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
 {
     MinecraftAccountPtr account(new MinecraftAccount());
@@ -119,10 +110,10 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
     return account;
@@ -338,8 +329,6 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     session->username = data.userName();
     // volatile auth token
     session->access_token = data.accessToken();
-    // the semi-permanent client token
-    session->client_token = data.clientToken();
     // profile name
     session->player_name = data.profileName();
     // profile ID

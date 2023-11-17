@@ -1,12 +1,12 @@
 #pragma once
 
+#include <minecraft/auth/MinecraftAccount.h>
 #include <QFile>
 #include <QtNetwork/QtNetwork>
 #include <memory>
 #include "tasks/Task.h"
-#include <minecraft/auth/MinecraftAccount.h>
 
-typedef shared_qobject_ptr<class SkinUpload> SkinUploadPtr;
+using SkinUploadPtr = shared_qobject_ptr<class SkinUpload>;
 
 class SkinUpload : public Task {
     Q_OBJECT

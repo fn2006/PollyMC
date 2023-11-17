@@ -54,7 +54,7 @@ class Task;
 class AccountTask;
 class MinecraftAccount;
 
-typedef shared_qobject_ptr<MinecraftAccount> MinecraftAccountPtr;
+using MinecraftAccountPtr = shared_qobject_ptr<MinecraftAccount>;
 Q_DECLARE_METATYPE(MinecraftAccountPtr)
 
 /**
@@ -92,7 +92,6 @@ class MinecraftAccount : public QObject, public Usable {
 
     static MinecraftAccountPtr createOffline(const QString& username);
 
-    static MinecraftAccountPtr loadFromJsonV2(const QJsonObject& json);
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject& json);
 
     static QUuid uuidFromUsername(QString username);
@@ -134,8 +133,6 @@ class MinecraftAccount : public QObject, public Usable {
 
     QString accountDisplayString() const { return data.accountDisplayString(); }
 
-    QString mojangUserName() const { return data.userName(); }
-
     QString accessToken() const { return data.accessToken(); }
 
     QString profileId() const { return data.profileId(); }
@@ -147,7 +144,7 @@ class MinecraftAccount : public QObject, public Usable {
     bool canMigrate() const { return data.canMigrateToMSA; }
 
     bool isMojangOrMSA() const { return data.type == AccountType::Mojang || data.type == AccountType::MSA; }
-    
+
     bool isMojang() const { return data.type == AccountType::Mojang; }
 
     bool isMSA() const { return data.type == AccountType::MSA; }
