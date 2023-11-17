@@ -48,6 +48,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
+#include "settings/MissingAuthlibInjectorBehavior.h"
 #include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
 #include "updater/ExternalUpdater.h"
@@ -76,6 +77,11 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
     defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
 
     m_languageModel = APPLICATION->translations();
+
+    ui->missingAIComboBox->addItem("Always ask", MissingAuthlibInjectorBehavior::Ask);
+    ui->missingAIComboBox->addItem("Ignore missing authlib-injector", MissingAuthlibInjectorBehavior::Ignore);
+    ui->missingAIComboBox->addItem("Automatically install authlib-injector", MissingAuthlibInjectorBehavior::Install);
+
     loadSettings();
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
@@ -189,6 +195,9 @@ void LauncherPage::applySettings()
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
+    s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
+    s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
+
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
     s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
@@ -220,6 +229,10 @@ void LauncherPage::applySettings()
 
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
+    s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
+
+    // authlib-injector
+    s->set("MissingAuthlibInjectorBehavior", ui->missingAIComboBox->currentData().toInt());
 }
 void LauncherPage::loadSettings()
 {
@@ -235,6 +248,9 @@ void LauncherPage::loadSettings()
     ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
 #endif
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
+
+    ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
+    ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
@@ -272,6 +288,15 @@ void LauncherPage::loadSettings()
     // Mods
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+    ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
+
+    // Missing authlib-injector behavior
+    int missingAI = s->get("MissingAuthlibInjectorBehavior").toInt();
+    int missingAIIndex = ui->missingAIComboBox->findData(missingAI);
+    if (missingAIIndex == -1) {
+        missingAIIndex = ui->missingAIComboBox->findData(MissingAuthlibInjectorBehavior::Ask);
+    }
+    ui->missingAIComboBox->setCurrentIndex(missingAIIndex);
 }
 
 void LauncherPage::refreshFontPreview()

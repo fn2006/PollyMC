@@ -54,7 +54,7 @@
 
 #include <chrono>
 
-enum AccountListVersion { MojangOnly = 2, MojangMSA = 3 };
+enum AccountListVersion { MojangMSA = 3 };
 
 AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)
 {
@@ -77,6 +77,17 @@ int AccountList::findAccountByProfileId(const QString& profileId) const
         }
     }
     return -1;
+}
+
+MinecraftAccountPtr AccountList::getAccountByInternalId(const QString& accountId) const
+{
+    for (int i = 0; i < count(); i++) {
+        MinecraftAccountPtr account = at(i);
+        if (account->internalId() == accountId) {
+            return account;
+        }
+    }
+    return nullptr;
 }
 
 MinecraftAccountPtr AccountList::getAccountByProfileName(const QString& profileName) const
@@ -123,19 +134,23 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 
     // override/replace existing account with the same profileId
     auto profileId = account->profileId();
-    if (profileId.size()) {
-        auto existingAccount = findAccountByProfileId(profileId);
-        if (existingAccount != -1) {
+    if (profileId.size() && account->isMojangOrMSA()) {
+        auto iter = std::find_if(m_accounts.constBegin(), m_accounts.constEnd(), [&](const MinecraftAccountPtr& existing) {
+            return existing->profileId() == profileId && existing->isMojangOrMSA();
+        });
+
+        if (iter != m_accounts.constEnd()) {
             qDebug() << "Replacing old account with a new one with the same profile ID!";
 
-            MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
-            m_accounts[existingAccount] = account;
-            if (m_defaultAccount == existingAccountPtr) {
+            MinecraftAccountPtr existingAccount = *iter;
+            const auto existingAccountIndex = std::distance(m_accounts.constBegin(), iter);
+            m_accounts[existingAccountIndex] = account;
+            if (m_defaultAccount == existingAccount) {
                 m_defaultAccount = account;
             }
             // disconnect notifications for changes in the account being replaced
-            existingAccountPtr->disconnect(this);
-            emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
+            existingAccount->disconnect(this);
+            emit dataChanged(index(existingAccountIndex), index(existingAccountIndex, columnCount(QModelIndex()) - 1));
             onListChanged();
             return;
         }
@@ -283,9 +298,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                     return account->accountDisplayString();
 
                 case TypeColumn: {
-                    auto typeStr = account->typeString();
-                    typeStr[0] = typeStr[0].toUpper();
-                    return typeStr;
+                    return account->typeDisplayName();
                 }
 
                 case StatusColumn: {
@@ -321,7 +334,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 }
 
                 case MigrationColumn: {
-                    if (account->isMSA() || account->isOffline()) {
+                    if (!account->isMojang()) {
                         return tr("N/A", "Can Migrate");
                     }
                     if (account->canMigrate()) {
@@ -366,8 +379,6 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                     return tr("Type");
                 case StatusColumn:
                     return tr("Status");
-                case MigrationColumn:
-                    return tr("Can Migrate?");
                 default:
                     return QVariant();
             }
@@ -379,11 +390,9 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case NameColumn:
                     return tr("User name of the account.");
                 case TypeColumn:
-                    return tr("Type of the account - Mojang or MSA.");
+                    return tr("Type of the account (MSA or Offline)");
                 case StatusColumn:
                     return tr("Current status of the account.");
-                case MigrationColumn:
-                    return tr("Can this account migrate to a Microsoft account?");
                 default:
                     return QVariant();
             }
@@ -473,9 +482,6 @@ bool AccountList::loadList()
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
     switch (listVersion) {
-        case AccountListVersion::MojangOnly: {
-            return loadV2(root);
-        } break;
         case AccountListVersion::MojangMSA: {
             return loadV3(root);
         } break;
@@ -489,36 +495,6 @@ bool AccountList::loadList()
     }
 }
 
-bool AccountList::loadV2(QJsonObject& root)
-{
-    beginResetModel();
-    auto defaultUserName = root.value("activeAccount").toString("");
-    QJsonArray accounts = root.value("accounts").toArray();
-    for (QJsonValue accountVal : accounts) {
-        QJsonObject accountObj = accountVal.toObject();
-        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV2(accountObj);
-        if (account.get() != nullptr) {
-            auto profileId = account->profileId();
-            if (!profileId.size()) {
-                continue;
-            }
-            if (findAccountByProfileId(profileId) != -1) {
-                continue;
-            }
-            connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
-            connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
-            m_accounts.append(account);
-            if (defaultUserName.size() && account->mojangUserName() == defaultUserName) {
-                m_defaultAccount = account;
-            }
-        } else {
-            qWarning() << "Failed to load an account.";
-        }
-    }
-    endResetModel();
-    return true;
-}
-
 bool AccountList::loadV3(QJsonObject& root)
 {
     beginResetModel();
@@ -527,12 +503,6 @@ bool AccountList::loadV3(QJsonObject& root)
         QJsonObject accountObj = accountVal.toObject();
         MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj);
         if (account.get() != nullptr) {
-            auto profileId = account->profileId();
-            if (profileId.size()) {
-                if (findAccountByProfileId(profileId) != -1) {
-                    continue;
-                }
-            }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
             m_accounts.append(account);

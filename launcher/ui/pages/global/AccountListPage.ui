@@ -54,8 +54,8 @@
    </attribute>
    <addaction name="actionAddMicrosoft"/>
    <addaction name="actionAddMojang"/>
+   <addaction name="actionAddAuthlibInjector"/>
    <addaction name="actionAddOffline"/>
-   <addaction name="actionAddElyby"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
@@ -67,6 +67,11 @@
   <action name="actionAddMojang">
    <property name="text">
     <string>Add &amp;Mojang</string>
+   </property>
+  </action>
+  <action name="actionAddAuthlibInjector">
+   <property name="text">
+    <string>Add &amp;authlib-injector</string>
    </property>
   </action>
   <action name="actionRemove">
@@ -108,11 +113,6 @@
   <action name="actionAddOffline">
    <property name="text">
     <string>Add &amp;Offline</string>
-   </property>
-  </action>
-  <action name="actionAddElyby">
-   <property name="text">
-    <string>Add &amp;Ely.by</string>
    </property>
   </action>
   <action name="actionRefresh">

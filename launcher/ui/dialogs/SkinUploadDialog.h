@@ -21,7 +21,7 @@ class SkinUploadDialog : public QDialog {
     void on_skinBrowseBtn_clicked();
 
    protected:
-    MinecraftAccountPtr m_acct;
+    MinecraftAccountPtr m_account;
 
    private:
     Ui::SkinUploadDialog* ui;

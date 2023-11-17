@@ -38,6 +38,8 @@
 #include <tools/BaseProfiler.h>
 #include <QObject>
 
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
 

@@ -54,7 +54,7 @@ class Task;
 class AccountTask;
 class MinecraftAccount;
 
-typedef shared_qobject_ptr<MinecraftAccount> MinecraftAccountPtr;
+using MinecraftAccountPtr = shared_qobject_ptr<MinecraftAccount>;
 Q_DECLARE_METATYPE(MinecraftAccountPtr)
 
 /**
@@ -86,14 +86,12 @@ class MinecraftAccount : public QObject, public Usable {
     explicit MinecraftAccount(QObject* parent = 0);
 
     static MinecraftAccountPtr createFromUsername(const QString& username);
+    static MinecraftAccountPtr createFromUsernameAuthlibInjector(const QString& username, const QString& authlibInjectorUrl);
 
     static MinecraftAccountPtr createBlankMSA();
 
     static MinecraftAccountPtr createOffline(const QString& username);
 
-    static MinecraftAccountPtr createElyby(const QString& username);
-
-    static MinecraftAccountPtr loadFromJsonV2(const QJsonObject& json);
     static MinecraftAccountPtr loadFromJsonV3(const QJsonObject& json);
 
     static QUuid uuidFromUsername(QString username);
@@ -108,11 +106,11 @@ class MinecraftAccount : public QObject, public Usable {
      */
     shared_qobject_ptr<AccountTask> login(QString password);
 
+    shared_qobject_ptr<AccountTask> loginAuthlibInjector(QString password);
+
     shared_qobject_ptr<AccountTask> loginMSA();
 
     shared_qobject_ptr<AccountTask> loginOffline();
-
-    shared_qobject_ptr<AccountTask> loginElyby(QString password);
 
     shared_qobject_ptr<AccountTask> refresh();
 
@@ -121,9 +119,19 @@ class MinecraftAccount : public QObject, public Usable {
    public: /* queries */
     QString internalId() const { return data.internalId; }
 
-    QString accountDisplayString() const { return data.accountDisplayString(); }
+    QString authlibInjectorUrl() const { return data.authlibInjectorUrl; }
 
-    QString mojangUserName() const { return data.userName(); }
+    QString authServerUrl() const { return data.authServerUrl(); }
+
+    QString accountServerUrl() const { return data.accountServerUrl(); }
+
+    QString sessionServerUrl() const { return data.sessionServerUrl(); }
+
+    QString servicesServerUrl() const { return data.servicesServerUrl(); }
+
+    bool usesCustomApiServers() const { return data.usesCustomApiServers(); }
+
+    QString accountDisplayString() const { return data.accountDisplayString(); }
 
     QString accessToken() const { return data.accessToken(); }
 
@@ -135,17 +143,41 @@ class MinecraftAccount : public QObject, public Usable {
 
     bool canMigrate() const { return data.canMigrateToMSA; }
 
-    bool isMSA() const { return data.type == AccountType::MSA; }
+    bool isMojangOrMSA() const { return data.type == AccountType::Mojang || data.type == AccountType::MSA; }
 
     bool isMojang() const { return data.type == AccountType::Mojang; }
 
-    bool isOffline() const { return data.type == AccountType::Offline; }
+    bool isMSA() const { return data.type == AccountType::MSA; }
 
-    bool isElyby() const { return data.type == AccountType::Elyby; }
+    bool isOffline() const { return data.type == AccountType::Offline; }
 
     bool ownsMinecraft() const { return data.minecraftEntitlement.ownsMinecraft; }
 
     bool hasProfile() const { return data.profileId().size() != 0; }
+
+    QString typeDisplayName() const
+    {
+        switch (data.type) {
+            case AccountType::Mojang: {
+                if (data.legacy) {
+                    return "Legacy";
+                }
+                return "Mojang";
+            } break;
+            case AccountType::AuthlibInjector: {
+                return "authlib-injector";
+            } break;
+            case AccountType::MSA: {
+                return "Microsoft";
+            } break;
+            case AccountType::Offline: {
+                return "Offline";
+            } break;
+            default: {
+                return "Unknown";
+            }
+        }
+    }
 
     QString typeString() const
     {
@@ -156,14 +188,17 @@ class MinecraftAccount : public QObject, public Usable {
                 }
                 return "mojang";
             } break;
+            case AccountType::AuthlibInjector: {
+                // This typeString gets passed to Minecraft; any Yggdrasil
+                // account should have the "mojang" type regardless of which
+                // servers are used.
+                return "mojang";
+            } break;
             case AccountType::MSA: {
                 return "msa";
             } break;
             case AccountType::Offline: {
                 return "offline";
-            } break;
-            case AccountType::Elyby: {
-                return "elyby";
             } break;
             default: {
                 return "unknown";

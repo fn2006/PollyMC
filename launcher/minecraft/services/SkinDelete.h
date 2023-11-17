@@ -1,19 +1,20 @@
 #pragma once
 
+#include <minecraft/auth/MinecraftAccount.h>
 #include <QFile>
 #include <QtNetwork/QtNetwork>
 #include "tasks/Task.h"
 
-typedef shared_qobject_ptr<class SkinDelete> SkinDeletePtr;
+using SkinDeletePtr = shared_qobject_ptr<class SkinDelete>;
 
 class SkinDelete : public Task {
     Q_OBJECT
    public:
-    SkinDelete(QObject* parent, QString token);
+    SkinDelete(QObject* parent, MinecraftAccountPtr acct);
     virtual ~SkinDelete() = default;
 
    private:
-    QString m_token;
+    MinecraftAccountPtr m_account;
     shared_qobject_ptr<QNetworkReply> m_reply;
 
    protected:

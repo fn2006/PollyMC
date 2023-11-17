@@ -40,6 +40,7 @@
 #include <QJsonObject>
 #include <QRegularExpression>
 #include <QUuid>
+#include "BuildConfig.h"
 
 namespace {
 void tokenToJSONV3(QJsonObject& parent, Katabasis::Token t, const char* tokenName)
@@ -278,67 +279,6 @@ bool entitlementFromJSONV3(const QJsonObject& parent, MinecraftEntitlement& out)
 
 }  // namespace
 
-bool AccountData::resumeStateFromV2(QJsonObject data)
-{
-    // The JSON object must at least have a username for it to be valid.
-    if (!data.value("username").isString()) {
-        qCritical() << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
-        return false;
-    }
-
-    QString userName = data.value("username").toString("");
-    QString clientToken = data.value("clientToken").toString("");
-    QString accessToken = data.value("accessToken").toString("");
-
-    QJsonArray profileArray = data.value("profiles").toArray();
-    if (profileArray.size() < 1) {
-        qCritical() << "Can't load Mojang account with username \"" << userName << "\". No profiles found.";
-        return false;
-    }
-
-    struct AccountProfile {
-        QString id;
-        QString name;
-        bool legacy;
-    };
-
-    QList<AccountProfile> profiles;
-    int currentProfileIndex = 0;
-    int index = -1;
-    QString currentProfile = data.value("activeProfile").toString("");
-    for (QJsonValue profileVal : profileArray) {
-        index++;
-        QJsonObject profileObject = profileVal.toObject();
-        QString id = profileObject.value("id").toString("");
-        QString name = profileObject.value("name").toString("");
-        bool legacy_ = profileObject.value("legacy").toBool(false);
-        if (id.isEmpty() || name.isEmpty()) {
-            qWarning() << "Unable to load a profile" << name << "because it was missing an ID or a name.";
-            continue;
-        }
-        if (id == currentProfile) {
-            currentProfileIndex = index;
-        }
-        profiles.append({ id, name, legacy_ });
-    }
-    auto& profile = profiles[currentProfileIndex];
-
-    type = AccountType::Mojang;
-    legacy = profile.legacy;
-
-    minecraftProfile.id = profile.id;
-    minecraftProfile.name = profile.name;
-    minecraftProfile.validity = Katabasis::Validity::Assumed;
-
-    yggdrasilToken.token = accessToken;
-    yggdrasilToken.extra["clientToken"] = clientToken;
-    yggdrasilToken.extra["userName"] = userName;
-    yggdrasilToken.validity = Katabasis::Validity::Assumed;
-
-    validity_ = minecraftProfile.validity;
-    return true;
-}
-
 bool AccountData::resumeStateFromV3(QJsonObject data)
 {
     auto typeV = data.value("type");
@@ -347,14 +287,19 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
         return false;
     }
     auto typeS = typeV.toString();
+    bool needsElyByMigration = false;
     if (typeS == "MSA") {
         type = AccountType::MSA;
     } else if (typeS == "Mojang") {
         type = AccountType::Mojang;
+    } else if (typeS == "AuthlibInjector") {
+        type = AccountType::AuthlibInjector;
+    } else if (typeS == "Elyby") {
+        // Migrate legacy Ely.by accounts to authlib-injector accounts
+        type = AccountType::AuthlibInjector;
+        needsElyByMigration = true;
     } else if (typeS == "Offline") {
         type = AccountType::Offline;
-    } else if (typeS == "Elyby") {
-        type = AccountType::Elyby;
     } else {
         qWarning() << "Failed to parse account data: type is not recognized.";
         return false;
@@ -363,6 +308,24 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
     if (type == AccountType::Mojang) {
         legacy = data.value("legacy").toBool(false);
         canMigrateToMSA = data.value("canMigrateToMSA").toBool(false);
+    }
+
+    if (type == AccountType::AuthlibInjector) {
+        if (needsElyByMigration) {
+            customAuthServerUrl = "https://authserver.ely.by/api/authlib-injector/authserver";
+            customAccountServerUrl = "https://authserver.ely.by/api/authlib-injector/api";
+            customSessionServerUrl = "https://authserver.ely.by/api/authlib-injector/sessionserver";
+            customServicesServerUrl = "https://authserver.ely.by/api/authlib-injector/minecraftservices";
+            authlibInjectorUrl = "https://authserver.ely.by/api/authlib-injector";
+            authlibInjectorMetadata = "";
+        } else {
+            customAuthServerUrl = data.value("customAuthServerUrl").toString();
+            customAccountServerUrl = data.value("customAccountServerUrl").toString();
+            customSessionServerUrl = data.value("customSessionServerUrl").toString();
+            customServicesServerUrl = data.value("customServicesServerUrl").toString();
+            authlibInjectorUrl = data.value("authlibInjectorUrl").toString();
+            authlibInjectorMetadata = data.value("authlibInjectorMetadata").toString();
+        }
     }
 
     if (type == AccountType::MSA) {
@@ -397,15 +360,7 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
 QJsonObject AccountData::saveState() const
 {
     QJsonObject output;
-    if (type == AccountType::Mojang) {
-        output["type"] = "Mojang";
-        if (legacy) {
-            output["legacy"] = true;
-        }
-        if (canMigrateToMSA) {
-            output["canMigrateToMSA"] = true;
-        }
-    } else if (type == AccountType::MSA) {
+    if (type == AccountType::MSA) {
         output["type"] = "MSA";
         output["msa-client-id"] = msaClientID;
         tokenToJSONV3(output, msaToken, "msa");
@@ -414,15 +369,69 @@ QJsonObject AccountData::saveState() const
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     } else if (type == AccountType::Offline) {
         output["type"] = "Offline";
-    }
-    else if (type == AccountType::Elyby) {
-        output["type"] = "Elyby";
+    } else if (type == AccountType::Mojang) {
+        if (legacy) {
+            output["legacy"] = true;
+        }
+        if (canMigrateToMSA) {
+            output["canMigrateToMSA"] = true;
+        }
+        output["type"] = "Mojang";
+    } else if (type == AccountType::AuthlibInjector) {
+        output["type"] = "AuthlibInjector";
+        output["customAuthServerUrl"] = customAuthServerUrl;
+        output["customAccountServerUrl"] = customAccountServerUrl;
+        output["customSessionServerUrl"] = customSessionServerUrl;
+        output["customServicesServerUrl"] = customServicesServerUrl;
+        output["authlibInjectorUrl"] = authlibInjectorUrl;
+        output["authlibInjectorMetadata"] = authlibInjectorMetadata;
     }
 
     tokenToJSONV3(output, yggdrasilToken, "ygg");
     profileToJSONV3(output, minecraftProfile, "profile");
     entitlementToJSONV3(output, minecraftEntitlement);
     return output;
+}
+
+bool AccountData::usesCustomApiServers() const
+{
+    return type == AccountType::AuthlibInjector;
+}
+
+QString AccountData::authServerUrl() const
+{
+    if (usesCustomApiServers()) {
+        return customAuthServerUrl;
+    } else {
+        return BuildConfig.MOJANG_AUTH_BASE;
+    }
+}
+
+QString AccountData::accountServerUrl() const
+{
+    if (usesCustomApiServers()) {
+        return customAccountServerUrl;
+    } else {
+        return BuildConfig.MOJANG_ACCOUNT_BASE;
+    }
+}
+
+QString AccountData::sessionServerUrl() const
+{
+    if (usesCustomApiServers()) {
+        return customSessionServerUrl;
+    } else {
+        return BuildConfig.MOJANG_SESSION_BASE;
+    }
+}
+
+QString AccountData::servicesServerUrl() const
+{
+    if (usesCustomApiServers()) {
+        return customServicesServerUrl;
+    } else {
+        return BuildConfig.MOJANG_SERVICES_BASE;
+    }
 }
 
 QString AccountData::userName() const
@@ -440,7 +449,7 @@ QString AccountData::accessToken() const
 
 QString AccountData::clientToken() const
 {
-    if (type != AccountType::Mojang && type != AccountType::Elyby) {
+    if (type != AccountType::Mojang && type != AccountType::AuthlibInjector) {
         return QString();
     }
     return yggdrasilToken.extra["clientToken"].toString();
@@ -448,7 +457,7 @@ QString AccountData::clientToken() const
 
 void AccountData::setClientToken(QString clientToken)
 {
-    if (type != AccountType::Mojang && type != AccountType::Elyby) {
+    if (type != AccountType::Mojang && type != AccountType::AuthlibInjector) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = clientToken;
@@ -464,7 +473,7 @@ void AccountData::generateClientTokenIfMissing()
 
 void AccountData::invalidateClientToken()
 {
-    if (type != AccountType::Mojang && type != AccountType::Elyby) {
+    if (type != AccountType::Mojang && type != AccountType::AuthlibInjector) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{-}]"));
@@ -487,10 +496,8 @@ QString AccountData::profileName() const
 QString AccountData::accountDisplayString() const
 {
     switch (type) {
-        case AccountType::Mojang: {
-            return userName();
-        }
-        case AccountType::Elyby: {
+        case AccountType::Mojang:
+        case AccountType::AuthlibInjector: {
             return userName();
         }
         case AccountType::Offline: {

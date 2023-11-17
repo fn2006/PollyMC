@@ -420,6 +420,35 @@ void VersionPage::on_actionDownload_All_triggered()
     m_container->refreshContainer();
 }
 
+void VersionPage::openInstallAuthlibInjector()
+{
+    auto vlist = APPLICATION->metadataIndex()->get("moe.yushi.authlibinjector");
+    if (!vlist) {
+        return;
+    }
+    VersionSelectDialog vselect(vlist.get(), tr("Select authlib-injector version"), this);
+    vselect.setEmptyString(tr("No authlib-injector versions are currently available."));
+    vselect.setEmptyErrorString(tr("Couldn't load or download the authlib-injector version lists!"));
+
+    auto currentVersion = m_profile->getComponentVersion("moe.yushi.authlibinjector");
+    if (!currentVersion.isEmpty()) {
+        vselect.setCurrentVersion(currentVersion);
+    }
+
+    if (vselect.exec() && vselect.selectedVersion()) {
+        auto vsn = vselect.selectedVersion();
+        m_profile->setComponentVersion("moe.yushi.authlibinjector", vsn->descriptor());
+        m_profile->resolve(Net::Mode::Online);
+        preselect(m_profile->rowCount(QModelIndex()) - 1);
+        m_container->refreshContainer();
+    }
+}
+
+void VersionPage::on_actionInstall_AuthlibInjector_triggered()
+{
+    openInstallAuthlibInjector();
+}
+
 void VersionPage::on_actionInstall_Loader_triggered()
 {
     InstallLoaderDialog dialog(m_inst->getPackProfile(), QString(), this);

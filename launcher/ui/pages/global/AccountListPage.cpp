@@ -44,29 +44,25 @@
 
 #include "net/NetJob.h"
 
+#include "ui/dialogs/AuthlibInjectorLoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/LoginDialog.h"
-#include "ui/dialogs/ElybyLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/SkinUploadDialog.h"
 
-#include "minecraft/auth/AccountTask.h"
 #include "minecraft/services/SkinDelete.h"
 #include "tasks/Task.h"
 
 #include "Application.h"
-
-#include "BuildConfig.h"
 
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Microsoft\" or \"Add Mojang\" buttons to link your Microsoft and/or Mojang "
-           "accounts."));
+           "If you're new here, you can select the \"Add Microsoft\" button to link your Microsoft account."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -75,7 +71,6 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->listView->setModel(m_accounts.get());
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::MigrationColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -153,6 +148,24 @@ void AccountListPage::on_actionAddMojang_triggered()
     }
 }
 
+void AccountListPage::on_actionAddAuthlibInjector_triggered()
+{
+    MinecraftAccountPtr account = AuthlibInjectorLoginDialog::newAccount(
+        this, tr("Please enter your username (sometimes an email address), password, and the URL of your API server."
+                 "<br>"
+                 "See <a href=\"https://github.com/fn2006/PollyMC/wiki/Alternative-Auth-Servers\">this page</a> on the PollyMC wiki for a "
+                 "list of common API servers.</p>"
+                 "<br><br>"
+                 "<b>Caution!</b> Your username and password will be sent to the authentication server you specify!"));
+
+    if (account) {
+        m_accounts->addAccount(account);
+        if (m_accounts->count() == 1) {
+            m_accounts->setDefaultAccount(account);
+        }
+    }
+}
+
 void AccountListPage::on_actionAddMicrosoft_triggered()
 {
     MinecraftAccountPtr account =
@@ -179,20 +192,14 @@ void AccountListPage::on_actionAddOffline_triggered()
     }
 }
 
-void AccountListPage::on_actionAddElyby_triggered()
-{
-    MinecraftAccountPtr account = ElybyLoginDialog::newAccount(this, tr("Please enter your Ely.by account email and password to add your account."));
-
-    if (account) {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
-        }
-    }
-}
-
 void AccountListPage::on_actionRemove_triggered()
 {
+    auto response = CustomMessageBox::selectable(this, tr("Remove account?"), tr("Do you really want to delete this account?"),
+                                                 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+    if (response != QMessageBox::Yes) {
+        return;
+    }
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();
@@ -232,18 +239,16 @@ void AccountListPage::updateButtonStates()
     bool hasSelection = !selection.empty();
     bool accountIsReady = false;
     bool accountIsOnline = false;
-    bool accountIsElyby = false;
     if (hasSelection) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
         accountIsOnline = !account->isOffline();
-        accountIsElyby = account->isElyby();
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline && !accountIsElyby);
-    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline && !accountIsElyby);
+    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
     ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
 
     if (m_accounts->defaultAccount().get() == nullptr) {
@@ -275,7 +280,7 @@ void AccountListPage::on_actionDeleteSkin_triggered()
     QModelIndex selected = selection.first();
     MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
     ProgressDialog prog(this);
-    auto deleteSkinTask = std::make_shared<SkinDelete>(this, account->accessToken());
+    auto deleteSkinTask = std::make_shared<SkinDelete>(this, account);
     if (prog.execWithTask((Task*)deleteSkinTask.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
         return;

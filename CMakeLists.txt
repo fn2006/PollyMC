@@ -188,11 +188,14 @@ set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_M
 # Build platform.
 set(Launcher_BUILD_PLATFORM "unknown" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
 
-# Channel list URL
-set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
+# Github repo URL with releases for updater
+set(Launcher_UPDATER_GITHUB_REPO "https://github.com/fn2006/PollyMC" CACHE STRING "Base github URL for the updater.")
+
+# Name to help updater identify valid artifacts
+set(Launcher_BUILD_ARTIFACT "" CACHE STRING "Artifact name to help the updater identify valid artifacts.")
 
 # The metadata server
-set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
+set(Launcher_META_URL "https://meta.unmojang.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
 
 # Imgur API Client ID
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
@@ -245,6 +248,11 @@ set(Launcher_MSA_CLIENT_ID "" CACHE STRING "Client ID you can get from Microsoft
 set(Launcher_CURSEFORGE_API_KEY "" CACHE STRING "API key for the CurseForge platform")
 set(Launcher_CURSEFORGE_API_KEY_API_URL "https://cf.polymc.org/api" CACHE STRING "URL to fetch the Curseforge API key from.")
 
+set(Launcher_COMPILER_NAME ${CMAKE_CXX_COMPILER_ID})
+set(Launcher_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION})
+set(Launcher_COMPILER_TARGET_SYSTEM ${CMAKE_SYSTEM_NAME})
+set(Launcher_COMPILER_TARGET_SYSTEM_VERSION ${CMAKE_SYSTEM_VERSION})
+set(Launcher_COMPILER_TARGET_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
@@ -339,6 +347,11 @@ add_subdirectory(program_info)
 ####################################### Install layout #######################################
 
 set(Launcher_ENABLE_UPDATER NO)
+set(Launcher_BUILD_UPDATER NO)
+
+if (NOT APPLE AND (NOT Launcher_UPDATER_GITHUB_REPO STREQUAL "" AND NOT Launcher_BUILD_ARTIFACT STREQUAL ""))
+	set(Launcher_BUILD_UPDATER YES)
+endif()
 
 if(NOT (UNIX AND APPLE))
     # Install "portable.txt" if selected component is "portable"

@@ -38,10 +38,12 @@
 #include <java/JavaVersion.h>
 #include <QDir>
 #include <QProcess>
+#include <unordered_set>
 #include "BaseInstance.h"
-#include "minecraft/launch/InjectAuthlib.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
 #include "minecraft/mod/Mod.h"
+
+const std::unordered_set<std::string> MANAGED_AGENTS = { "moe.yushi:authlibinjector" };
 
 class ModFolderModel;
 class ResourceFolderModel;
@@ -130,6 +132,7 @@ class MinecraftInstance : public BaseInstance {
     /// get arguments passed to java
     QStringList javaArguments();
     QString getLauncher();
+    bool shouldApplyOnlineFixes();
 
     /// get variables for launch command variable substitution/environment
     QMap<QString, QString> getVariables() override;
@@ -154,6 +157,8 @@ class MinecraftInstance : public BaseInstance {
     // FIXME: remove
     virtual QString getMainClass() const;
 
+    virtual QStringList processAuthArgs(AuthSessionPtr account) const;
+
     // FIXME: remove
     virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) const;
 
@@ -172,7 +177,6 @@ class MinecraftInstance : public BaseInstance {
     mutable std::shared_ptr<TexturePackFolderModel> m_texture_pack_list;
     mutable std::shared_ptr<WorldList> m_world_list;
     mutable std::shared_ptr<GameOptions> m_game_options;
-    mutable std::shared_ptr<AuthlibInjector> m_injector;
 };
 
-typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;
+using MinecraftInstancePtr = std::shared_ptr<MinecraftInstance>;

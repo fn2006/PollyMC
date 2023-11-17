@@ -105,8 +105,22 @@ void LauncherPartLaunch::executeTask()
     auto instance = m_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
+    QString legacyJarPath;
+    if (minecraftInstance->getLauncher() == "legacy" || minecraftInstance->shouldApplyOnlineFixes()) {
+        legacyJarPath = APPLICATION->getJarPath("NewLaunchLegacy.jar");
+        if (legacyJarPath.isEmpty()) {
+            const char* reason = QT_TR_NOOP("Legacy launcher library could not be found. Please check your installation.");
+            emit logLine(tr(reason), MessageLevel::Fatal);
+            emitFailed(tr(reason));
+            return;
+        }
+    }
+
     m_launchScript = minecraftInstance->createLaunchScript(m_session, m_serverToJoin);
     QStringList args = minecraftInstance->javaArguments();
+
+    args.append(minecraftInstance->processAuthArgs(m_session));
+
     QString allArgs = args.join(", ");
     emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
 
@@ -119,6 +133,9 @@ void LauncherPartLaunch::executeTask()
 
     auto classPath = minecraftInstance->getClassPath();
     classPath.prepend(jarPath);
+
+    if (!legacyJarPath.isEmpty())
+        classPath.prepend(legacyJarPath);
 
     auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN

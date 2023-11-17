@@ -72,11 +72,29 @@ class Config {
     /// A short string identifying this build's platform or distribution.
     QString BUILD_PLATFORM;
 
+    /// A short string identifying this build's valid artifacts int he updater. For example, "lin64" or "win32".
+    QString BUILD_ARTIFACT;
+
     /// A string containing the build timestamp
     QString BUILD_DATE;
 
+    /// A string identifying the compiler use to build
+    QString COMPILER_NAME;
+
+    /// A string identifying the compiler version used to build
+    QString COMPILER_VERSION;
+
+    /// A string identifying the compiler target system os
+    QString COMPILER_TARGET_SYSTEM;
+
+    /// A String identifying the compiler target system version
+    QString COMPILER_TARGET_SYSTEM_VERSION;
+
+    /// A String identifying the compiler target processor
+    QString COMPILER_TARGET_SYSTEM_PROCESSOR;
+
     /// URL for the updater's channel
-    QString UPDATER_BASE;
+    QString UPDATER_GITHUB_REPO;
 
     /// The public key used to sign releases for the Sparkle updater appcast
     QString MAC_SPARKLE_PUB_KEY;
@@ -151,7 +169,13 @@ class Config {
 
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
-    QString AUTH_BASE = "https://authserver.mojang.com/";
+
+    // Minecraft expects these without trailing slashes, best to keep that format everywhere
+    QString MOJANG_AUTH_BASE = "https://authserver.mojang.com";
+    QString MOJANG_ACCOUNT_BASE = "https://api.mojang.com";
+    QString MOJANG_SESSION_BASE = "https://sessionserver.mojang.com";
+    QString MOJANG_SERVICES_BASE = "https://api.minecraftservices.com";
+
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
     QString FMLLIBS_BASE_URL = "https://files.prismlauncher.org/fmllibs/";  // FIXME: move into CMakeLists
     QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";      // FIXME: move into CMakeLists
@@ -181,6 +205,18 @@ class Config {
      * \return The version number in string format (major.minor.revision.build).
      */
     QString printableVersionString() const;
+
+    /**
+     * \brief Compiler ID String
+     * \return a string of the form "Name - Version"  of just "Name" if the version is empty
+     */
+    QString compilerID() const;
+
+    /**
+     * \brief System ID String
+     * \return a string of the form "OS Verison Processor"
+     */
+    QString systemID() const;
 };
 
 extern const Config BuildConfig;

@@ -131,6 +131,11 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         }
+        case Qt::SizeHintRole:
+            if (column == ImageColumn) {
+                return QSize(32, 32);
+            }
+            return {};
         case Qt::CheckStateRole:
             switch (column) {
                 case ActiveColumn:
@@ -226,6 +231,25 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
         auto m = at(i.row());
         auto index_dir = indexDir();
         m->destroy(index_dir);
+    }
+
+    update();
+
+    return true;
+}
+
+bool ModFolderModel::deleteModsMetadata(const QModelIndexList& indexes)
+{
+    if (indexes.isEmpty())
+        return true;
+
+    for (auto i : indexes) {
+        if (i.column() != 0) {
+            continue;
+        }
+        auto m = at(i.row());
+        auto index_dir = indexDir();
+        m->destroyMetadata(index_dir);
     }
 
     update();
