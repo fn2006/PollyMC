@@ -562,8 +562,8 @@ QStringList MinecraftInstance::processAuthArgs(AuthSessionPtr session) const
                 if (session->authlib_injector_metadata != "") {
                     args << "-Dauthlibinjector.yggdrasil.prefetched=" + session->authlib_injector_metadata;
                 }
+                break;
             }
-            break;
         }
     }
     return args;
