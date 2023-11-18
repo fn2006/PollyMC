@@ -42,7 +42,7 @@ jobs:
           mv ${{ github.workspace }}/PollyMC-source PollyMC-${{ env.VERSION }}
           mv PollyMC-Linux-Qt6-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
-          mv PollyMC-Linux-Qt5-Portable*/PollyMC-Qt5-portable.tar.gz PollyMC-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
+          mv PollyMC-Linux-Qt5-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux-Qt5*/PollyMC.tar.gz PollyMC-Linux-Qt5-${{ env.VERSION }}.tar.gz
           mv PollyMC-*.AppImage/PollyMC-*.AppImage PollyMC-Linux-x86_64.AppImage
           mv PollyMC-*.AppImage.zsync/PollyMC-*.AppImage.zsync PollyMC-Linux-x86_64.AppImage.zsync
