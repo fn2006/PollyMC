@@ -3,9 +3,17 @@
 <img src="./program_info/pollymc-header.svg#gh-dark-mode-only" alt="PollyMC logo" width="60%"/>
 </p>
 
-PollyMC is a **fork** of Prism Launcher that adds support for Ely.by accounts and allows you to play offline mode without an account.
+PollyMC is a **fork** of Prism Launcher. It is **not** endorsed by or affiliated with PolyMC or Prism launcher.
 
-PollyMC is **not** endorsed by or affiliated with PolyMC or Prism launcher.
+<h1>Advantages of this fork over regular Prism:</h1>
+
+Offline mode doesn't require an account.
+
+[Alternative auth server support](https://github.com/fn2006/PollyMC/wiki/Alternative-Auth-Servers).
+
+Ability to download FTB modpacks from within the launcher.
+
+Mojang account support (Online-mode servers won't work).
 
 <h1>Having a problem with the launcher?</h1>
 
