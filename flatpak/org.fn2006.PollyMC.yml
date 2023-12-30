@@ -6,11 +6,11 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
   - org.freedesktop.Sdk.Extension.openjdk8
 add-extensions:
-  com.valvesoftware.Steam.Utility.gamescope:
-    version: stable
-    add-ld-path: lib
+  org.freedesktop.Platform.VulkanLayer.gamescope:
+    version: "22.08"
     no-autodownload: true
     autodelete: false
+    add-ld-path: lib
     directory: utils/gamescope
 
 command: pollymc
