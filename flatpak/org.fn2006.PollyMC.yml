@@ -6,18 +6,25 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
   - org.freedesktop.Sdk.Extension.openjdk8
 add-extensions:
-  com.valvesoftware.Steam.Utility.gamescope:
-    version: stable
-    add-ld-path: lib
+  org.freedesktop.Platform.VulkanLayer.gamescope:
+    version: "22.08"
     no-autodownload: true
     autodelete: false
+    add-ld-path: lib
     directory: utils/gamescope
+
+  org.freedesktop.Platform.VulkanLayer.MangoHud:
+    version: "22.08"
+    no-autodownload: true
+    autodelete: false
+    add-ld-path: lib
+    directory: utils/mangohud
 
 command: pollymc
 finish-args:
   - --share=ipc
-  - --socket=x11
   - --socket=wayland
+  - --socket=fallback-x11
   - --device=all
   - --share=network
   - --socket=pulseaudio
@@ -25,6 +32,8 @@ finish-args:
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
     # Mod drag&drop
   - --filesystem=xdg-download:ro
+  - --env=PATH=/app/bin:/usr/bin:/app/utils/gamescope/bin:/app/utils/mangohud/bin
+  - --env=VK_LAYER_PATH=/usr/lib/extensions/vulkan/share/vulkan/implicit_layer.d
 
 cleanup:
   - /lib/libGLU*
@@ -59,8 +68,7 @@ modules:
       - mv /app/jre /app/jdk/17
       - /usr/lib/sdk/openjdk8/install.sh
       - mv /app/jre /app/jdk/8
-    cleanup:
-      - /jre
+      - rm -rf /app/jdk/8/bin
 
   - name: glfw
     buildsystem: cmake-ninja
@@ -161,3 +169,8 @@ modules:
         path: prime-run
       - type: file
         path: pollymc
+
+  - name: extensions
+    buildsystem: simple
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/utils/{gamescope,mangohud}
