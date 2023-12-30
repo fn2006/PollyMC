@@ -59,8 +59,7 @@ modules:
       - mv /app/jre /app/jdk/17
       - /usr/lib/sdk/openjdk8/install.sh
       - mv /app/jre /app/jdk/8
-    cleanup:
-      - /jre
+      - rm -rf /app/jdk/8/bin
 
   - name: glfw
     buildsystem: cmake-ninja
