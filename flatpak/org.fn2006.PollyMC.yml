@@ -16,8 +16,8 @@ add-extensions:
 command: pollymc
 finish-args:
   - --share=ipc
-  - --socket=x11
   - --socket=wayland
+  - --socket=fallback-x11
   - --device=all
   - --share=network
   - --socket=pulseaudio
