@@ -32,6 +32,8 @@ finish-args:
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
     # Mod drag&drop
   - --filesystem=xdg-download:ro
+  - --env=PATH=/app/bin:/usr/bin:/app/utils/gamescope/bin:/app/utils/mangohud/bin
+  - --env=VK_LAYER_PATH=/usr/lib/extensions/vulkan/share/vulkan/implicit_layer.d
 
 cleanup:
   - /lib/libGLU*
@@ -167,3 +169,8 @@ modules:
         path: prime-run
       - type: file
         path: pollymc
+
+  - name: extensions
+    buildsystem: simple
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/utils/{gamescope,mangohud}
