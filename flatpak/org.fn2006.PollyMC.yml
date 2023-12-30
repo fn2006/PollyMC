@@ -13,6 +13,13 @@ add-extensions:
     add-ld-path: lib
     directory: utils/gamescope
 
+  org.freedesktop.Platform.VulkanLayer.MangoHud:
+    version: "22.08"
+    no-autodownload: true
+    autodelete: false
+    add-ld-path: lib
+    directory: utils/mangohud
+
 command: pollymc
 finish-args:
   - --share=ipc
