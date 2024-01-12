@@ -43,7 +43,8 @@ AuthlibInjectorLoginDialog::~AuthlibInjectorLoginDialog()
 
 QString AuthlibInjectorLoginDialog::fixUrl(QString url)
 {
-    QString fixed(url);
+    QString fixed{ url };
+    fixed = fixed.trimmed();
     if (!fixed.contains("://")) {
         fixed.prepend("https://");
     }
