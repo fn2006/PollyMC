@@ -58,6 +58,7 @@ class AccountList : public QAbstractListModel {
         MigrationColumn,
         TypeColumn,
         StatusColumn,
+        AuthServerColumn,
 
         NUM_COLUMNS
     };
