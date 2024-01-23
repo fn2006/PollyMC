@@ -119,7 +119,7 @@ class MinecraftAccount : public QObject, public Usable {
    public: /* queries */
     QString internalId() const { return data.internalId; }
 
-    QString authlibInjectorUrl() const { return data.authlibInjectorUrl; }
+    QString authlibInjectorUrl() const { return data.authlibInjectorUrl(); }
 
     QString authServerUrl() const { return data.authServerUrl(); }
 

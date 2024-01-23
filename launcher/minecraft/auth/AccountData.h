@@ -84,6 +84,7 @@ struct AccountData {
     QString accountServerUrl() const;
     QString sessionServerUrl() const;
     QString servicesServerUrl() const;
+    QString authlibInjectorUrl() const;
 
     //! userName for Mojang accounts, gamertag for MSA
     QString accountDisplayString() const;
@@ -113,7 +114,7 @@ struct AccountData {
     QString customAccountServerUrl;
     QString customSessionServerUrl;
     QString customServicesServerUrl;
-    QString authlibInjectorUrl;
+    QString customAuthlibInjectorUrl;
     QString authlibInjectorMetadata;
 
     QString msaClientID;

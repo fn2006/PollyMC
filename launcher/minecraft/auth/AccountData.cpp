@@ -316,14 +316,14 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
             customAccountServerUrl = "https://authserver.ely.by/api/authlib-injector/api";
             customSessionServerUrl = "https://authserver.ely.by/api/authlib-injector/sessionserver";
             customServicesServerUrl = "https://authserver.ely.by/api/authlib-injector/minecraftservices";
-            authlibInjectorUrl = "https://authserver.ely.by/api/authlib-injector";
+            customAuthlibInjectorUrl = "https://authserver.ely.by/api/authlib-injector";
             authlibInjectorMetadata = "";
         } else {
             customAuthServerUrl = data.value("customAuthServerUrl").toString();
             customAccountServerUrl = data.value("customAccountServerUrl").toString();
             customSessionServerUrl = data.value("customSessionServerUrl").toString();
             customServicesServerUrl = data.value("customServicesServerUrl").toString();
-            authlibInjectorUrl = data.value("authlibInjectorUrl").toString();
+            customAuthlibInjectorUrl = data.value("authlibInjectorUrl").toString();
             authlibInjectorMetadata = data.value("authlibInjectorMetadata").toString();
         }
     }
@@ -383,7 +383,7 @@ QJsonObject AccountData::saveState() const
         output["customAccountServerUrl"] = customAccountServerUrl;
         output["customSessionServerUrl"] = customSessionServerUrl;
         output["customServicesServerUrl"] = customServicesServerUrl;
-        output["authlibInjectorUrl"] = authlibInjectorUrl;
+        output["authlibInjectorUrl"] = customAuthlibInjectorUrl;
         output["authlibInjectorMetadata"] = authlibInjectorMetadata;
     }
 
@@ -422,6 +422,15 @@ QString AccountData::sessionServerUrl() const
         return customSessionServerUrl;
     } else {
         return BuildConfig.MOJANG_SESSION_BASE;
+    }
+}
+
+QString AccountData::authlibInjectorUrl() const
+{
+    if (usesCustomApiServers()) {
+        return customAuthlibInjectorUrl;
+    } else {
+        return QString();
     }
 }
 

@@ -17,11 +17,11 @@ QString AuthlibInjectorMetadataStep::describe()
 
 void AuthlibInjectorMetadataStep::perform()
 {
-    if (m_data->authlibInjectorUrl == "") {
+    if (m_data->customAuthlibInjectorUrl == "") {
         emit finished(AccountTaskState::STATE_WORKING, tr("Account has no authlib-injector URL."));
         return;
     }
-    QNetworkRequest request = QNetworkRequest(m_data->authlibInjectorUrl);
+    QNetworkRequest request = QNetworkRequest(m_data->customAuthlibInjectorUrl);
     AuthRequest* requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &AuthlibInjectorMetadataStep::onRequestDone);
     requestor->get(request);

@@ -335,14 +335,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 }
 
                 case AuthServerColumn: {
-                    QString suffix = "/authlib-injector/authserver";
-                    QString server = account->authServerUrl();
-                    if (server.endsWith(suffix)) {
-                        server.chop(suffix.length());
-                        return server;
-                    } else {
-                        return server;
-                    }
+                    return account->authlibInjectorUrl();
                 }
 
                 case MigrationColumn: {
