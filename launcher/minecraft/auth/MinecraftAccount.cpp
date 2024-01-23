@@ -87,7 +87,7 @@ MinecraftAccountPtr MinecraftAccount::createFromUsernameAuthlibInjector(const QS
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
 
-    account->data.authlibInjectorUrl = authlibInjectorUrl;
+    account->data.customAuthlibInjectorUrl = authlibInjectorUrl;
     account->data.customAuthServerUrl = authlibInjectorUrl + "/authserver";
     account->data.customAccountServerUrl = authlibInjectorUrl + "/api";
     account->data.customSessionServerUrl = authlibInjectorUrl + "/sessionserver";
@@ -342,7 +342,7 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     }
 
     // API URLs
-    session->authlib_injector_url = data.authlibInjectorUrl;
+    session->authlib_injector_url = data.authlibInjectorUrl();
     session->auth_server_url = data.authServerUrl();
     session->account_server_url = data.accountServerUrl();
     session->session_server_url = data.sessionServerUrl();

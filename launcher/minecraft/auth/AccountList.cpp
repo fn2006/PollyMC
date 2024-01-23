@@ -51,6 +51,7 @@
 
 #include <FileSystem.h>
 #include <QSaveFile>
+#include <QString>
 
 #include <chrono>
 
@@ -333,6 +334,10 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                     }
                 }
 
+                case AuthServerColumn: {
+                    return account->authlibInjectorUrl();
+                }
+
                 case MigrationColumn: {
                     if (!account->isMojang()) {
                         return tr("N/A", "Can Migrate");
@@ -379,6 +384,8 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                     return tr("Type");
                 case StatusColumn:
                     return tr("Status");
+                case AuthServerColumn:
+                    return tr("Server");
                 default:
                     return QVariant();
             }
@@ -393,6 +400,8 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                     return tr("Type of the account (MSA or Offline)");
                 case StatusColumn:
                     return tr("Current status of the account.");
+                case AuthServerColumn:
+                    return tr("Auth server the account is using.");
                 default:
                     return QVariant();
             }
