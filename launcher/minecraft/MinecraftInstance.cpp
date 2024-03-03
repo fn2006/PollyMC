@@ -547,11 +547,11 @@ QStringList MinecraftInstance::processAuthArgs(AuthSessionPtr session) const
 	
     if (session->uses_custom_api_servers) {
 		if (v != "1.16.4" && v != "1.16.5") {
-			args << "-Dminecraft.api.env=custom";
-			args << "-Dminecraft.api.auth.host=" + session->auth_server_url;
-			args << "-Dminecraft.api.account.host=" + session->account_server_url;
-			args << "-Dminecraft.api.session.host=" + session->session_server_url;
-			args << "-Dminecraft.api.services.host=" + session->services_server_url;
+            args << "-Dminecraft.api.env=custom";
+            args << "-Dminecraft.api.auth.host=" + session->auth_server_url;
+            args << "-Dminecraft.api.account.host=" + session->account_server_url;
+            args << "-Dminecraft.api.session.host=" + session->session_server_url;
+            args << "-Dminecraft.api.services.host=" + session->services_server_url;
 		}
         auto agents = m_components->getProfile()->getAgents();
         for (auto agent : agents) {
