@@ -544,7 +544,7 @@ QStringList MinecraftInstance::processAuthArgs(AuthSessionPtr session) const
 {
     QStringList args;
 	QString v = m_components->getProfile()->getMinecraftVersion();
-	
+
     if (session->uses_custom_api_servers) {
 		if (v != "1.16.4" && v != "1.16.5") {
             args << "-Dminecraft.api.env=custom";
