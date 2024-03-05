@@ -27,6 +27,7 @@ bool AuthSession::MakeOffline(QString offline_playername)
     access_token = "0";
     player_name = offline_playername;
     status = PlayableOffline;
+    wants_online = false;
     return true;
 }
 
