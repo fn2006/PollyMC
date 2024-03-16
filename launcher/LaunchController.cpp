@@ -36,6 +36,7 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 #include "settings/MissingAuthlibInjectorBehavior.h"
 #include "ui/pages/instance/VersionPage.h"
@@ -338,12 +339,6 @@ void LaunchController::login()
                 progDialog.execWithTask(task.get());
                 continue;
             }
-            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
-            /*
-            case AccountState::Queued: {
-                return;
-            }
-            */
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,

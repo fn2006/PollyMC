@@ -54,10 +54,11 @@
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
 #include "flows/Offline.h"
+#include "minecraft/auth/AccountData.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
-    data.internalId = QUuid::createUuid().toString(QUuid::Id128);
+    data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
 }
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)

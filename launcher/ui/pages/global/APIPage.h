@@ -67,7 +67,6 @@ class APIPage : public QWidget, public BasePage {
     void updateBaseURLPlaceholder(int index);
     void loadSettings();
     void applySettings();
-    void fetchKeyButtonPressed();
 
    private:
     Ui::APIPage* ui;

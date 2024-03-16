@@ -52,7 +52,6 @@
 #include "net/PasteUpload.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
-#include "ui/GuiUtil.h"
 
 APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
 {
@@ -84,16 +83,11 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
     ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
 
-    if (BuildConfig.FLAME_API_KEY_API_URL.isEmpty())
-        ui->fetchKeyButton->hide();
-
     loadSettings();
 
     resetBaseURLNote();
     connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLNote);
     connect(ui->baseURLEntry, &QLineEdit::textEdited, this, &APIPage::resetBaseURLNote);
-
-    connect(ui->fetchKeyButton, &QPushButton::clicked, this, &APIPage::fetchKeyButtonPressed);
 }
 
 APIPage::~APIPage()
@@ -178,14 +172,6 @@ void APIPage::applySettings()
     QString modrinthToken = ui->modrinthToken->text();
     s->set("ModrinthToken", modrinthToken);
     s->set("UserAgentOverride", ui->userAgentLineEdit->text());
-}
-
-void APIPage::fetchKeyButtonPressed()
-{
-    QString apiKey = GuiUtil::fetchFlameKey(parentWidget());
-
-    if (!apiKey.isEmpty())
-        ui->flameKey->setText(apiKey);
 }
 
 bool APIPage::apply()

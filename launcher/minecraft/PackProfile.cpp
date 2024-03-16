@@ -36,7 +36,6 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-
 #include "Application.h"
 
 #include <Version.h>
@@ -432,7 +431,7 @@ bool PackProfile::remove(const int index)
     return true;
 }
 
-bool PackProfile::remove(const QString id)
+bool PackProfile::remove(const QString& id)
 {
     int i = 0;
     for (auto patch : d->components) {
