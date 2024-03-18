@@ -544,11 +544,7 @@ QStringList MinecraftInstance::processAuthArgs(AuthSessionPtr session) const
 {
     QStringList args;
     if (session->uses_custom_api_servers) {
-        args << "-Dminecraft.api.env=custom";
-        args << "-Dminecraft.api.auth.host=" + session->auth_server_url;
-        args << "-Dminecraft.api.account.host=" + session->account_server_url;
-        args << "-Dminecraft.api.session.host=" + session->session_server_url;
-        args << "-Dminecraft.api.services.host=" + session->services_server_url;
+        bool using_authlib_injector = false;
         auto agents = m_components->getProfile()->getAgents();
         for (auto agent : agents) {
             if (agent->library()->artifactPrefix() == "moe.yushi:authlibinjector") {
@@ -562,8 +558,17 @@ QStringList MinecraftInstance::processAuthArgs(AuthSessionPtr session) const
                 if (session->authlib_injector_metadata != "") {
                     args << "-Dauthlibinjector.yggdrasil.prefetched=" + session->authlib_injector_metadata;
                 }
+                using_authlib_injector = true;
                 break;
             }
+        }
+        if (!using_authlib_injector) {
+            qDebug() << "authlib-injector not found, setting -Dminecraft.api.*.host system properties.";
+            args << "-Dminecraft.api.env=custom";
+            args << "-Dminecraft.api.auth.host=" + session->auth_server_url;
+            args << "-Dminecraft.api.account.host=" + session->account_server_url;
+            args << "-Dminecraft.api.session.host=" + session->session_server_url;
+            args << "-Dminecraft.api.services.host=" + session->services_server_url;
         }
     }
     return args;
