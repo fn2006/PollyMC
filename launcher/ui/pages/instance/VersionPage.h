@@ -67,7 +67,6 @@ class VersionPage : public QMainWindow, public BasePage {
     void closedImpl() override;
     void openInstallAuthlibInjector();
 
-
    private slots:
     void on_actionChange_version_triggered();
     void on_actionInstall_AuthlibInjector_triggered();
@@ -83,7 +82,6 @@ class VersionPage : public QMainWindow, public BasePage {
     void on_actionAdd_Agents_triggered();
     void on_actionRevert_triggered();
     void on_actionEdit_triggered();
-    void on_actionInstall_mods_triggered();
     void on_actionCustomize_triggered();
     void on_actionDownload_All_triggered();
 

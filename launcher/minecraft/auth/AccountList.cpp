@@ -52,8 +52,6 @@
 #include <FileSystem.h>
 #include <QSaveFile>
 
-#include <chrono>
-
 enum AccountListVersion { MojangMSA = 3 };
 
 AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)
@@ -134,9 +132,10 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 
     // override/replace existing account with the same profileId
     auto profileId = account->profileId();
-    if (profileId.size() && account->isMojangOrMSA()) {
+    if (profileId.size()) {
         auto iter = std::find_if(m_accounts.constBegin(), m_accounts.constEnd(), [&](const MinecraftAccountPtr& existing) {
-            return existing->profileId() == profileId && existing->isMojangOrMSA();
+            return existing->profileId() == profileId && existing->accountType() == account->accountType() &&
+                   existing->authlibInjectorUrl() == account->authlibInjectorUrl();
         });
 
         if (iter != m_accounts.constEnd()) {
@@ -334,7 +333,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 }
 
                 case MigrationColumn: {
-                    if (!account->isMojang()) {
+                    if (account->accountType() != AccountType::Mojang) {
                         return tr("N/A", "Can Migrate");
                     }
                     if (account->canMigrate()) {
