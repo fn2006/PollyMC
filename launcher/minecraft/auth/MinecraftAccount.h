@@ -143,13 +143,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     bool canMigrate() const { return data.canMigrateToMSA; }
 
-    bool isMojangOrMSA() const { return data.type == AccountType::Mojang || data.type == AccountType::MSA; }
-
-    bool isMojang() const { return data.type == AccountType::Mojang; }
-
-    bool isMSA() const { return data.type == AccountType::MSA; }
-
-    bool isOffline() const { return data.type == AccountType::Offline; }
+    [[nodiscard]] AccountType accountType() const noexcept { return data.type; }
 
     bool ownsMinecraft() const { return data.minecraftEntitlement.ownsMinecraft; }
 
@@ -160,21 +154,21 @@ class MinecraftAccount : public QObject, public Usable {
         switch (data.type) {
             case AccountType::Mojang: {
                 if (data.legacy) {
-                    return "Legacy";
+                    return tr("Legacy", "Account type");
                 }
-                return "Mojang";
+                return tr("Mojang", "Account type");
             } break;
             case AccountType::AuthlibInjector: {
-                return "authlib-injector";
+                return tr("authlib-injector", "Account type");
             } break;
             case AccountType::MSA: {
-                return "Microsoft";
+                return tr("Microsoft", "Account type");
             } break;
             case AccountType::Offline: {
-                return "Offline";
+                return tr("Offline", "Account type");
             } break;
             default: {
-                return "Unknown";
+                return tr("Unknown", "Account type");
             }
         }
     }

@@ -16,7 +16,12 @@ jobs:
       SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
       WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
       WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
-      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      APPLE_CODESIGN_CERT: ${{ secrets.APPLE_CODESIGN_CERT }}
+      APPLE_CODESIGN_PASSWORD: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
+      APPLE_CODESIGN_ID: ${{ secrets.APPLE_CODESIGN_ID }}
+      APPLE_NOTARIZE_APPLE_ID: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
+      APPLE_NOTARIZE_TEAM_ID: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
+      APPLE_NOTARIZE_PASSWORD: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
@@ -41,14 +46,13 @@ jobs:
         run: |
           mv ${{ github.workspace }}/PollyMC-source PollyMC-${{ env.VERSION }}
           mv PollyMC-Linux-Qt6-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-          mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
+          mv PollyMC-Linux-Qt6*/PollyMC.tar.gz PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux-Qt5-Portable*/PollyMC-portable.tar.gz PollyMC-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
           mv PollyMC-Linux-Qt5*/PollyMC.tar.gz PollyMC-Linux-Qt5-${{ env.VERSION }}.tar.gz
           mv PollyMC-*.AppImage/PollyMC-*.AppImage PollyMC-Linux-x86_64.AppImage
           mv PollyMC-*.AppImage.zsync/PollyMC-*.AppImage.zsync PollyMC-Linux-x86_64.AppImage.zsync
-          mv PollyMC*.flatpak/PollyMC*.flatpak PollyMC-Linux-${{ env.VERSION }}-x86_64.flatpak
-          mv PollyMC-macOS-Legacy*/PollyMC.tar.gz PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
-          mv PollyMC-macOS*/PollyMC.tar.gz PollyMC-macOS-${{ env.VERSION }}.tar.gz
+          mv PollyMC-macOS-Legacy*/PollyMC.zip PollyMC-macOS-Legacy-${{ env.VERSION }}.zip
+          mv PollyMC-macOS*/PollyMC.zip PollyMC-macOS-${{ env.VERSION }}.zip
 
           tar --exclude='.git' -czf PollyMC-${{ env.VERSION }}.tar.gz PollyMC-${{ env.VERSION }}
 
@@ -88,22 +92,21 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            PollyMC-Windows-MSVC-Setup-${{ env.VERSION }}.exe
-            PollyMC-Windows-MSVC-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-MSVC-${{ env.VERSION }}.zip
-            PollyMC-Linux-x86_64.AppImage
-            PollyMC-Linux-x86_64.AppImage.zsync
-            PollyMC-Linux-${{ env.VERSION }}-x86_64.flatpak
-            PollyMC-macOS-${{ env.VERSION }}.tar.gz
-            PollyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Qt5-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
+            PollyMC-Linux-x86_64.AppImage
+            PollyMC-Linux-x86_64.AppImage.zsync
             PollyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PollyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PollyMC-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
-            PollyMC-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
-            PollyMC-Windows-MSVC-arm64-${{ env.VERSION }}.zip
-            PollyMC-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
-            PollyMC-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
             PollyMC-Windows-MinGW-w64-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-arm64-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
+            PollyMC-Windows-MSVC-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Portable-${{ env.VERSION }}.zip
+            PollyMC-Windows-MSVC-Setup-${{ env.VERSION }}.exe
+            PollyMC-macOS-${{ env.VERSION }}.zip
+            PollyMC-macOS-Legacy-${{ env.VERSION }}.zip
             PollyMC-${{ env.VERSION }}.tar.gz
